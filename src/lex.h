@@ -28,8 +28,8 @@ enum type_of_lex {
 //  23             24             25             26
 
 // Лексемы математических операций ( сравнение, сложение и т.п.)
-    LEX_EQ, LEX_LSS, LEX_GTR, LEX_LEQ, LEX_NEQ, LEX_GEQ, LEX_ASSIGN,
-//  27      28       29       30       31       32       33
+    LEX_ASSIGN, LEX_LSS, LEX_GTR, LEX_EQ, LEX_LEQ,  LEX_GEQ, LEX_NEQ,
+//  27          28       29       30      31        32       33
 
     LEX_PLUS, LEX_MINUS, LEX_TIMES, LEX_SLASH, LEX_DSLASH, LEX_PERC, LEX_POW,
 //  34        35         36         37         38          39        40
