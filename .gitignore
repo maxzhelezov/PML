@@ -24,4 +24,5 @@ thumbs.db
 *.dll
 *.lib
 *.ppu
-
+*.out
+build/
