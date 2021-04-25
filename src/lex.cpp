@@ -1,6 +1,7 @@
 // Лексический этап 
 #include "lex.h"
 #include <cstdlib>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -107,9 +108,9 @@ default: return false;
 
     }
 }*/
-const char * Scanner::TD [21] = { 
+const char * Scanner::TD [22] = { 
 
-    "NULL" "=", "<", ">" ,"==", "<=" ,">=", "!=", "+" ,"-" ,"*", 
+    "NULL","=", "<", ">" ,"==", "<=" ,">=", "!=", "+" ,"-" ,"*", 
 //   0      1    2    2+1   4    5     6     7     8    9    10  
     "/" ,"//" ,"%" ,"**","(" ,")" ,"[" ,"]" ,";" "," ,":" ,"."
 //   11   12    13    14  15   16   17   18  19   20   21   22
@@ -172,7 +173,7 @@ void Scanner::getc()
             c=EOF;
             return;
         } 
-        char_left=read(fd,buf,BUFSIZ);
+        char_left=read(fd,this->buf,BUFSIZ);
         char_scanned=char_left;
         if(char_scanned<0)
         {
@@ -198,7 +199,7 @@ void Scanner::getc()
         cerr<<" char is EOF"<<c<<endl;
         return;
     }
-    c=buf[char_scanned-char_left];
+    c=this->buf[char_scanned-char_left];
     
     cerr<<" char is "<<c<<endl;
     char_left--;
@@ -248,7 +249,7 @@ Lex Scanner::get_lex () {
                 {
                     curstate=STRING;
                 }
-                else if(c>='0'&&c<='9') //NUMBER //DONE
+                else if(isdigit(c)) //NUMBER //DONE
                 {
                     d+=c-'0';
                     curstate=NUMBER;
@@ -294,6 +295,7 @@ Lex Scanner::get_lex () {
                 // Остались только char
                 else 
                 {
+                    charbuf.push_back (c);
                     curstate=NAME;
                 }
                 break;
@@ -312,16 +314,11 @@ Lex Scanner::get_lex () {
                 }
                 else
                 {
-                    cerr<<TD[LEX_STRING]<<"  "<<charbuf;
+                    cerr<<TT[LEX_STRING]<<"  "<<charbuf;
                     j   = put ( charbuf );
                     return Lex ( LEX_STRING, j );
                 }
-                /*if ( c == '"' ) {
-                    CS  = H;
-                }
-                else if ( c == '@' || c == '{' )
-                    throw c;
-                break;*/
+                break;
             }
             case NAME:
             {
@@ -330,15 +327,16 @@ Lex Scanner::get_lex () {
                 }
                 else {
                     char_left++;
+                    //cerr<<charbuf<<endl;
                     if ( (j = look ( charbuf, TW) ) ) 
                     {
-                        cerr<<TD[(type_of_lex) ( j + (int) LEX_TW )];
+                        cerr<<TT[(type_of_lex) ( j + (int) LEX_TW )];
                         return Lex ( (type_of_lex) (j+(int) LEX_TW), j );
                     }
                     else 
                     {
                         j   = put ( charbuf );
-                        cerr<<TD[LEX_NAME];
+                        cerr<<TT[LEX_NAME];
                         return Lex (LEX_NAME, j );
                     }
                 }
@@ -346,13 +344,15 @@ Lex Scanner::get_lex () {
             }
             case NUMBER:
             {
-                if ( c>='0'&&c<='9') {
+                if ( isdigit(c)) {
                     d = d * 10 + ( c - '0' );
                 }
                 else {
                     char_left++; // Аналог ungetc в моей низкоуровневой буфферизации
+                    cerr<<TT[LEX_NUM];
                     return Lex ( LEX_NUM, d );
                 }
+                break;
             }
             case COMM://DONE
             {
@@ -364,6 +364,8 @@ Lex Scanner::get_lex () {
                     exit(0);
                 }
                 char_left++;
+                curstate=H;
+                break;
             }
             case COMP:
             {
@@ -381,6 +383,7 @@ Lex Scanner::get_lex () {
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )];
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
+                break;
             }
             case DIV://DONE
             {
@@ -415,6 +418,7 @@ Lex Scanner::get_lex () {
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )];
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
+                break;
             }
             case NEQ://DONE
             {
@@ -440,76 +444,20 @@ Lex Scanner::get_lex () {
                 j   = look( charbuf, TD );
                 cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )];
                 return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                break;
             }
-            /*case SPC:
-            {
-                if(c!=' ')
-                {
-                //Error();
-                    cerr<<" Wrong INDENT size , "<<space<<" spaces only ";
-                    cerr<<endl<<__FILE__<<__LINE__<<endl;
-                    exit(0);
-                }
-                else if(++space==4)
-                {
-                    curstate=IND;
-                    cerr<<" AAAAAAAAAAAAAAAAAAAAAAAAAA ";
-                }
-                // Если прочитали 4 пробела - перейдём на IND сразу
-                else
-                {
-                    cerr<<"  -"<<space;
-                    break;
-                }
-            }
-            case IND:
-            {
-                cerr<<"Attention"<<endl;
-                if(space==4)
-                {
-                    if (curlvl=lvl+1)
-                    {
-                        cerr<<TT[LEX_INDENT];
-                        return l;
-                    }
-                    else if (curlvl=lvl-1)
-                    {
-                        cerr<<TT[LEX_DEDENT];
-                        return l;
-                    }
-                    else if(curlvl==lvl)
-                    {
-                        curstate = H;
-                        curlvl=0;
-                    }
-                    else
-                    {
-                        cerr<<" Wrong number of indents: current level is ";
-                        cerr<<curlvl<<" actual level is "<<lvl<<endl;
-                        cerr<<endl<<__FILE__<<__LINE__<<endl;
-                        exit(0);
-                    }
-                    break;
-                }
-                if(c==' ')
-                {
-                    curstate=SPC;
-                    space=1;
-                    curlvl++;
-                    break;
-                }*/
             case IND:
             {
                 int curlvl=0;
                 while(c==' ')
                 {
                     curlvl++;
-                    for(i=0;i<1+2;i++)
+                    for(i=0;i<3;i++)
                     {
                         getc();
                         if(c!=' ')
                         {
-                            cerr<<" Wrong INDENT size , "<<space<<" spaces only ";
+                            cerr<<" Wrong INDENT size , "<<i+1<<" spaces only ";
                             cerr<<endl<<__FILE__<<__LINE__<<endl;
                             exit(0);
                         }
@@ -531,6 +479,13 @@ Lex Scanner::get_lex () {
                 }
                 else if(curlvl==lvl)
                 {
+                    //getc();
+                    if(c==EOF)
+                    {
+                        cout<< "Success"<<endl;
+                        exit(0);
+                    }
+                    cerr<<TT[LEX_NEWLINE];
                     return Lex(LEX_NEWLINE);
                 }
                 else
@@ -552,18 +507,3 @@ Lex Scanner::get_lex () {
     while(1) ;
 }
 
-int main ()
-{
-    Scanner a ("test.txt");
-    int i;
-    while (1)
-    {
-        cin >>i;
-        a.get_lex();
-    }
-    Lex l(LEX_BREAK,0);
-    cout<< l<<endl;
-
-
-    cout<<"Hello\n";
-}
