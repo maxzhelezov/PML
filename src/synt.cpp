@@ -36,7 +36,7 @@ void Parser::simple_stmt ()
     small_stmt();
     if (curtype!=LEX_NEWLINE )
     {
-        throw "simple_stmt";
+        throw "simple_stmt : no newline";
     }
 } 
 // flow : break| cont |ret
@@ -49,6 +49,8 @@ void Parser::small_stmt ()
             flow_stmt(); 
             return;
         case LEX_PASS:
+//pass block
+
             return;
         case LEX_GLOBAL:
             global_stmt();
@@ -63,6 +65,7 @@ void Parser::expr_stmt ()
     test();
     if( curtype==LEX_ASSIGN)
     {
+        gl();
         test();
     }
 } 
@@ -70,6 +73,7 @@ void Parser::flow_stmt ()
 {
     switch (curtype)
     {
+        // break and cont block
         case LEX_BREAK: 
         case LEX_CONT: 
         gl();
@@ -84,6 +88,7 @@ void Parser::flow_stmt ()
             return;
     }
 }  
+
 void Parser::global_stmt()
 {
     if(curtype!=LEX_GLOBAL)
@@ -143,7 +148,8 @@ void Parser::parameters ()
     if(curtype!=LEX_RLBRACKET)
         throw "parameters: no opening round bracket";
     gl();
-    argslist(); //Реализовать [argslist]
+    if(curtype==LEX_NAME)
+        argslist(); //Реализован [argslist]
     if(curtype!=LEX_RRBRACKET)
         throw "parameters: no closing round bracket";
     gl();
@@ -335,8 +341,12 @@ void Parser::factor ()
     {
         //знак есть
         gl();
+        trailer();
     }
-    power();
+    else
+    {
+        power();
+    }
 } 
 void Parser::power ()
 {
@@ -361,7 +371,7 @@ void Parser::atom ()
     case LEX_RLBRACKET:
     {
         gl();
-        testlist(); //Реализовать [argslist]
+        testlist(); //Реализовать [test]
         if(curtype!=LEX_RRBRACKET)
             throw "atom : no closing round bracket";
         gl();
@@ -370,7 +380,7 @@ void Parser::atom ()
     case LEX_SLBRACKET:
     {
         gl();
-        testlist(); //Реализовать [argslist]
+        testlist(); //Реализовать [test]
         if(curtype!=LEX_SRBRACKET)
             throw "atom : no closing square bracket";
         gl();
@@ -385,7 +395,7 @@ void Parser::trailer()
 {
 switch (curtype)
     {
-    case LEX_COMMA: gl(); //NAME 
+    case LEX_DOT: gl(); //NAME 
                     gl(); return;
     case LEX_RLBRACKET:
     {

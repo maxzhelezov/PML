@@ -18,7 +18,7 @@ class Parser: public Scanner
     void simple_stmt (); 
     void small_stmt (); 
     void expr_stmt ();  
-    void  flow_stmt ();  
+    void flow_stmt (); 
     void global_stmt(); 
     void compound_stmt (); 
     void funcdef(); 
