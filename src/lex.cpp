@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <algorithm>
-
+vector<Ident> TID;
 Ident::Ident() { 
         declared = false; 
         assigned = false; 
@@ -73,41 +73,6 @@ ostream & operator<< ( ostream &s, Lex l )
     return s;
 }
 
-/*void lex_step ()
-{
-    ;
-}
-void test()
-{
-    
-}
-char gc()
-{
-    return 'a';
-}*/
-/*bool ischar(char c)
-{
-    switch (c)
-    {
-case 'a':case 'b': case 'c': case 'd': case 'e':
-case 'f':case 'g': case 'h': case 'i': case 'j':
-case 'k':case 'l': case 'm': case 'n': case 'o':
-case 'p':case 'q': case 'r': case 's': case 't':
-case 'u':case 'v': case 'w': case 'x': case 'y':
-case 'z':
-case 'а':case 'б':case 'в': case 'г': case 'д': case 'е':
-case 'ж':case 'з':case 'и': case 'й': case 'к': case 'л':
-//case 'а':case 'a':case 'b': case 'c': case 'd': case 'e':
-//case 'а':case 'a':case 'b': case 'c': case 'd': case 'e':
-//case 'а':case 'a':case 'b': case 'c': case 'd': case 'e':
-//case 'а':case 'a':case 'b': case 'c': case 'd': case 'e':
-
-return true;
-
-default: return false;
-
-    }
-}*/
 const char * Scanner::TD [22] = { 
 
     "NULL","=", "<", ">" ,"==", "<=" ,">=", "!=", "+" ,"-" ,"*", 
@@ -118,7 +83,7 @@ const char * Scanner::TD [22] = {
 const char * Scanner::TW [18]={ 
     "NULL" ,  "None" , "True" , "False", "global" ,
 //   0         1        2        3        4
-    "def", "return" , "while" ,  "for" , "continue" , "pass" , "break" 
+    "def", "return" , "while" ,  "for" , "continue" , "pass" , "break", 
 //   5      6          7          8       9            10       11
     "if" ,"else",  "not" , "and" ,  "in" ,  "or" 
 //   12    13       14      15       16      17
@@ -179,7 +144,7 @@ void Scanner::getc()
         {
             //throw Error();
             throw 1;
-            cerr<<"Oops"<<__FILE__<<__LINE__<<endl;
+            //cerr<<"Oops"<<__FILE__<<__LINE__<<endl;
         }
         if(char_scanned==0)
         {
@@ -196,12 +161,12 @@ void Scanner::getc()
     {
         eof_flag=true;
         c= EOF;
-        cerr<<" char is EOF"<<c<<endl;
+        //cerr<<" char is EOF"<<c<<endl;
         return;
     }
     c=this->buf[char_scanned-char_left];
     
-    cerr<<" char is "<<c<<endl;
+    //cerr<<" char is "<<c<<endl;
     char_left--;
 }
 bool isdigit(char c)
@@ -226,9 +191,8 @@ bool isspace(char c)
 }
 
 Lex Scanner::get_lex () {
-    int space,  d,i, j;
+    int  d,i, j;
     string  charbuf;
-    Lex l; // Под снос
     state   curstate = H;
     do
     {

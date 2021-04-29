@@ -67,10 +67,6 @@ public:
 
 
 
-#ifndef TIDDEF
-#define TIDDEF
-vector<Ident> TID;
-#endif
 class Lex 
 {
     type_of_lex   lex_type;

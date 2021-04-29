@@ -9,11 +9,10 @@ using namespace std;
 int main ()
 {
     Scanner a ("test.txt");
-    int i;
     while (1)
     {
-        cin >>i;
         a.get_lex();
+        cerr<<endl;
     }
     Lex l(LEX_BREAK,0);
     cout<< l<<endl;
