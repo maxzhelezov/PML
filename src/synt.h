@@ -7,11 +7,14 @@
 extern vector<Ident> TID;
 class Parser: public Scanner
 {
+    bool file_input_flag;
     public:
     Lex curlex;
     type_of_lex curtype;
     void gl();
-    void start (); 
+    Parser(string initializer, const char * filename=NULL);
+    // Вместо start используется конструктор
+    // void start (); 
     void single_input(); 
     void file_input(); 
     void stmt (); 

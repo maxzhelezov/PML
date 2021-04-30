@@ -2,7 +2,10 @@
 // Лексический этап 
 #include <iostream>
 #include <vector>
+#include <string>
 #include <cstdio>
+#include <fstream>
+#include <cstring>
 using namespace std;
 //#include <string>
 enum type_of_lex {
@@ -88,12 +91,24 @@ class Scanner
     char buf[BUFSIZ];
     bool eof_flag;
     void getc();
-    
+    int lexfile;
 public :
-    static const char * TD [22];
+    class my_exception 
+    {
+        public:
+        enum errtype {lex,synt} ;
+        int line;
+        string filename;
+        string error_message;
+        errtype error_type;
+        my_exception(int line,const char * filename,
+                string error_message1, errtype error_type);
+    };
+    static const char * TD [23];
     static const char * TW [18];
     static const char * TT [POLIZ_FGO +1];
     Scanner( const char *prog);
     Lex get_lex();
     ~Scanner();
+    friend ostream & operator<< ( ostream &s, my_exception e );
 };
