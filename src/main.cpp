@@ -27,7 +27,7 @@ int main (int argc,char * argv[])
             Parser (initializer,argv[2]);
         }
     }
-    catch (Scanner::my_exception e)
+    catch (Scanner::my_exception &e)
     {
         cerr<<endl<<endl<<e;
         return 1;

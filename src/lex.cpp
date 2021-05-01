@@ -1,17 +1,21 @@
 // Лексический этап 
 #include "lex.h"
 #include <cstdlib>
+#include <set>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <vector>
 #include <algorithm>
 using namespace std;
 vector<Ident> TID;
+
 Ident::Ident() { 
         declared = false; 
         assigned = false; 
 }
+
 bool Ident::operator==( const string& s ) { 
     return name == s; 
 }
@@ -74,18 +78,18 @@ ostream & operator<< ( ostream &s, Lex l )
     return s;
 }
 
-Scanner::my_exception::my_exception (int line1, const char * filename1,
+Scanner::my_exception::my_exception (int line1, int sym1,
         string error_message1,errtype error_type1)
 {
     line=line1;
-    filename=filename1;
+    sym=sym1;
     error_type=error_type1; 
     error_message=error_message1;
 }
 ostream & operator<< ( ostream &s, Scanner::my_exception e )
 {
     s<<(e.error_type==Scanner::my_exception::lex?"Lex":"Synt");
-    s<<"  error in file : "<< e.filename<<" line : "<<e.line<<endl;
+    s<<"  error at "<<endl<<"Line: "<< e.line<<endl<<"Sym : "<<e.sym<<endl;
     s<<"Message: "<<e.error_message<<endl;
     return s;
 }
@@ -124,12 +128,8 @@ Scanner::Scanner( const char* prog)
 {
     char_left=0;
     eof_flag=false;  
-    lexfile=open("lexres.txt",O_RDWR|O_CREAT|O_TRUNC,0666);
-    if(lexfile<0)
-    {
-        cerr<<"sadsasadsadsadsadsadsadsadad";
-    }
-    //newline_flag=false;
+    char_in_str=0;
+    lines=1;
     lvl=0;
     if( prog==NULL)
         fd=0;
@@ -137,7 +137,7 @@ Scanner::Scanner( const char* prog)
         fd=open(prog,O_RDONLY);
     if(fd==-1)
     {
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "Can't open file",
                     Scanner::my_exception::lex);
     }
@@ -145,10 +145,7 @@ Scanner::Scanner( const char* prog)
 }
 Scanner::~Scanner()
 {
-    char eofc =EOF;
     close (fd);
-    write(lexfile,&eofc,1);
-    close(lexfile);
 }
 int look ( const string buf, const char ** list ) {
     int i = 0;
@@ -174,10 +171,10 @@ void Scanner::getc()
         if(char_scanned<0)
         {
             //throw Error();
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "Problem when reading from file",
                     Scanner::my_exception::lex);
-            //fprintf(lexfile<<"Oops"<<__FILE__<<__LINE__<<endl;
+            //cerr<<"Oops"<<char_in_str<<lines<<endl;
         }
         if(char_scanned==0)
         {
@@ -194,12 +191,12 @@ void Scanner::getc()
     {
         eof_flag=true;
         c= EOF;
-        //fprintf(lexfile<<" char is EOF"<<c<<endl;
+        //cerr<<" char is EOF"<<c<<endl;
         return;
     }
     c=this->buf[char_scanned-char_left];
     
-    //fprintf(lexfile<<" char is "<<c<<endl;
+    //cerr<<" char is "<<c<<endl;
     char_left--;
 }
 bool isdigit(char c)
@@ -233,13 +230,13 @@ Lex Scanner::get_lex () {
     {
         lvl--;
         dedent_left--;
-        write(lexfile,TT[LEX_DEDENT], strlen(TT[LEX_DEDENT]));
-        write(lexfile,"\t",1);
+        cerr<<TT[LEX_DEDENT]<<"\t";
         return Lex(LEX_DEDENT);
     }
     do
     {
         getc();
+        char_in_str++;
         switch(curstate)
         {
             case H:
@@ -247,13 +244,15 @@ Lex Scanner::get_lex () {
                 if (c=='\r'||c==' '||c=='\t')//DONE
                 {
                     ;//nothing
+                    if(c=='\t')
+                    char_in_str+=3;
                 }
                 else if(c=='\n')//DONE
                 {
                     newline_flag=true;
-                    
-                    write(lexfile, TT[LEX_NEWLINE],strlen(TT[LEX_NEWLINE]));
-                    write(lexfile,"\t",1);
+                    char_in_str=0;
+                    lines++;
+                    cerr<<TT[LEX_NEWLINE]<<"\t";
                     return Lex(LEX_NEWLINE);
                 }
                 else if(c=='"')
@@ -318,19 +317,18 @@ Lex Scanner::get_lex () {
                 if ( c != '"' ) {
                     if(c=='\n'||c==EOF)
                     {
-                        throw Scanner::my_exception(__LINE__,__FILE__,
+                        throw Scanner::my_exception(lines,char_in_str,
                                 "String : unexpected end of string",
                                 Scanner::my_exception::lex);
-                        //fprintf(lexfile<<" Lex mistake:"<< " String unexpected end of string ";
-                        //fprintf(lexfile<<endl<<__FILE__<<__LINE__<<endl;
+                        //cerr<<" Lex mistake:"<< " String unexpected end of string ";
+                        //cerr<<endl<<char_in_str<<lines<<endl;
                         //exit(0);
                     }
                     charbuf.push_back (c); 
                 }
                 else
                 {
-                    write(lexfile,TT[LEX_STRING],strlen(TT[LEX_STRING]));
-                    write(lexfile,"\t",1);
+                    cerr<<TT[LEX_STRING]<<"\t"<<charbuf;
                     j   = put ( charbuf );
                     return Lex ( LEX_STRING, j );
                 }
@@ -343,19 +341,17 @@ Lex Scanner::get_lex () {
                 }
                 else {
                     char_left++;
-                    //fprintf(lexfile<<charbuf<<endl;
+                    char_in_str--;
+                    //cerr<<charbuf<<endl;
                     if ( (j = look ( charbuf, TW) ) ) 
                     {
-                        write(lexfile,TT[(type_of_lex) ( j + (int) LEX_TW )],
-                            strlen(TT[(type_of_lex) ( j + (int) LEX_TW )]));
-                        write(lexfile,"\t",1);
+                        cerr<<TT[(type_of_lex) ( j + (int) LEX_TW )]<<"\t";
                         return Lex ( (type_of_lex) (j+(int) LEX_TW), j );
                     }
                     else 
                     {
                         j   = put ( charbuf );
-                        write(lexfile, TT[LEX_NAME],strlen(TT[LEX_NAME]));
-                        write(lexfile,"\t",1);
+                        cerr<<TT[LEX_NAME]<<"\t";
                         return Lex (LEX_NAME, j );
                     }
                 }
@@ -367,9 +363,13 @@ Lex Scanner::get_lex () {
                     d = d * 10 + ( c - '0' );
                 }
                 else {
+                    if(isalpha(c))
+                        throw Scanner::my_exception(lines,char_in_str,
+                            "Wrong lex identifier ",
+                            Scanner::my_exception::lex);
                     char_left++; // Аналог ungetc в моей низкоуровневой буфферизации
-                    write(lexfile,TT[LEX_NUM],strlen(TT[LEX_NUM]));
-                    //fprintf(lexfile, "%s","111111111111111111111111111");
+                    char_in_str--;
+                    cerr<<TT[LEX_NUM]<<"\t";
                     return Lex ( LEX_NUM, d );
                 }
                 break;
@@ -394,18 +394,15 @@ Lex Scanner::get_lex () {
                 {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
-                    write(lexfile,TT[(type_of_lex) ( j + (int) LEX_TD )],
-                        strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                    write(lexfile,"\t",1);
+                    cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else 
                 {
                     char_left++;
+                    char_in_str--;
                     j   = look ( charbuf, TD );
-                    write(lexfile, TT[(type_of_lex) ( j + (int) LEX_TD )],
-                     strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                    write(lexfile,"\t",1);
+                    cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 break;
@@ -416,20 +413,15 @@ Lex Scanner::get_lex () {
                 {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
-                    write(lexfile, TT[(type_of_lex) ( j + (int) LEX_TD )],
-                     strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                    write(lexfile,"\t",1);
-                    //fprintf(lexfile, "%s%s",TT[(type_of_lex) ( j + (int) LEX_TD )],"\t");
+                    cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else 
                 {
                     char_left++;
+                    char_in_str--;
                     j   = look ( charbuf, TD );
-                    write(lexfile, TT[(type_of_lex) ( j + (int) LEX_TD )],
-                     strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                    write(lexfile,"\t",1);
-                    //fprintf(lexfile, "%s%s",TT[(type_of_lex) ( j + (int) LEX_TD )],"\t");
+                    cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
             }
@@ -439,20 +431,15 @@ Lex Scanner::get_lex () {
                 {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
-                    write(lexfile, TT[(type_of_lex) ( j + (int) LEX_TD )],
-                     strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                    write(lexfile,"\t",1);
-                    //fprintf(lexfile, "%s%s",TT[(type_of_lex) ( j + (int) LEX_TD )],"\t");
+                    cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else 
                 {
                     char_left++;
+                    char_in_str--;
                     j   = look ( charbuf, TD );
-                    write(lexfile, TT[(type_of_lex) ( j + (int) LEX_TD )],
-                     strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                    write(lexfile,"\t",1);
-                    //fprintf(lexfile, "%s%s",TT[(type_of_lex) ( j + (int) LEX_TD )],"\t");
+                    cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )];
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 break;
@@ -463,19 +450,16 @@ Lex Scanner::get_lex () {
                 {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
-                    write(lexfile, TT[(type_of_lex) ( j + (int) LEX_TD )],
-                     strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                    write(lexfile,"\t",1);
-                    //fprintf(lexfile, "%s%s",TT[(type_of_lex) ( j + (int) LEX_TD )],"\t");
+                    cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
                     return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else
                 {
-                    throw Scanner::my_exception(__LINE__,__FILE__,
+                    throw Scanner::my_exception(lines,char_in_str,
                                 "No = after !",
                                 Scanner::my_exception::lex);
-                    //fprintf(lexfile<<" Lex :"<< " No = after ! ";
-                    //fprintf(lexfile<<endl<<__FILE__<<__LINE__<<endl;
+                    //cerr<<" Lex :"<< " No = after ! ";
+                    //cerr<<endl<<char_in_str<<lines<<endl;
                     //exit(0);
                     //
                 }
@@ -484,11 +468,9 @@ Lex Scanner::get_lex () {
             case DEL: //DONE
             {
                 char_left++;
+                char_in_str--;
                 j   = look( charbuf, TD );
-                write(lexfile, TT[(type_of_lex) ( j + (int) LEX_TD )],
-                     strlen(TT[(type_of_lex) ( j + (int) LEX_TD )]));
-                write(lexfile,"\t",1);
-                //fprintf(lexfile, "%s%s",TT[(type_of_lex) ( j + (int) LEX_TD )],"\t");
+                cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
                 return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
                 break;
             }
@@ -503,29 +485,28 @@ Lex Scanner::get_lex () {
                         getc();
                         if(c!=' ')
                         {
-                            throw Scanner::my_exception(__LINE__,__FILE__,
+                            throw Scanner::my_exception(lines,char_in_str,
                                 "Wrong INDENT size",
                                 Scanner::my_exception::lex);
-                            //fprintf(lexfile<<" Wrong INDENT size , "<<i+1<<" spaces only ";
-                            //fprintf(lexfile<<endl<<__FILE__<<__LINE__<<endl;
+                            //cerr<<" Wrong INDENT size , "<<i+1<<" spaces only ";
+                            //cerr<<endl<<char_in_str<<lines<<endl;
                             //exit(0);
                         }
                     }
                     getc();
                 }
                 char_left++; // Аналог ungetc в моей низкоуровневой буфферизации
+                char_in_str--;
                 if (curlvl==lvl+1)
                 {
-                    write(lexfile, TT[LEX_INDENT],strlen(TT[LEX_INDENT]));
-                    write(lexfile,"\t",1);
+                    cerr<<TT[LEX_INDENT]<<"\t";
                     lvl++;
                     newline_flag=false;
                     return Lex(LEX_INDENT);
                 }
                 else if (curlvl<lvl)
                 {
-                    write(lexfile, TT[LEX_DEDENT],strlen(TT[LEX_DEDENT]));
-                    write(lexfile,"\t",1);
+                    cerr<<TT[LEX_DEDENT]<<"\t";
                     lvl--;
                     dedent_left=lvl-curlvl;
                     newline_flag=false;
@@ -540,7 +521,7 @@ Lex Scanner::get_lex () {
                         exit(0);
                     }
                     newline_flag=true;
-                    fprintf(lexfile<<TT[LEX_NEWLINE];
+                    cerr<<TT[LEX_NEWLINE];
                     return Lex(LEX_NEWLINE);
                 }*/
                 else if(newline_flag)
@@ -567,12 +548,12 @@ Lex Scanner::get_lex () {
                     /*tempstr=tempstr.append(std::to_string(curlvl));
                     tempstr=tempstr.append(" actual level is ");
                     tempstr=tempstr.append(std::to_string(lvl));*/
-                    throw Scanner::my_exception(__LINE__,__FILE__,
+                    throw Scanner::my_exception(lines,char_in_str,
                                 tempstr,
                                 Scanner::my_exception::lex);
-                    //fprintf(lexfile<<" Wrong number of indents: current level is ";
-                    //fprintf(lexfile<<curlvl<<" actual level is "<<lvl<<endl;
-                    //fprintf(lexfile<<endl<<__FILE__<<__LINE__<<endl;
+                    //cerr<<" Wrong number of indents: current level is ";
+                    //cerr<<curlvl<<" actual level is "<<lvl<<endl;
+                    //cerr<<endl<<char_in_str<<lines<<endl;
                     exit(0);
                 }
                 if(c==EOF)

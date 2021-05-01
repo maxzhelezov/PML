@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdio>
 #include "lex.h"
-extern vector<Ident> TID;
+extern std::vector<Ident> TID;
 class Parser: public Scanner
 {
     bool file_input_flag;
@@ -12,7 +12,7 @@ class Parser: public Scanner
     Lex curlex;
     type_of_lex curtype;
     void gl();
-    Parser(string initializer, const char * filename=NULL);
+    Parser(std::string initializer, const char * filename=NULL);
     // Вместо start используется конструктор
     // void start (); 
     void single_input(); 

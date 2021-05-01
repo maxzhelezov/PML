@@ -4,10 +4,10 @@
 #include <vector>
 #include <string>
 #include <cstdio>
-#include <fstream>
-#include <cstring>
-using namespace std;
-//#include <string>
+#include <string>
+
+
+
 enum type_of_lex {
 //  Программные лексемы - члены таблицы TD
     LEX_NULL, LEX_TW, LEX_NONE, LEX_TRUE, LEX_FALSE, LEX_GLOBAL,
@@ -42,18 +42,20 @@ enum type_of_lex {
     POLIZ_FGO                                                                                   /*50*/
 };
 
+
+
 class Ident
 {
-    string name;
+    std::string name;
     type_of_lex type;
     int value;
     bool declared;
     bool assigned;
 public:
     Ident();
-    bool operator== ( const string& s );
-    Ident ( const string n ) ;
-    string get_name () const ;
+    bool operator== ( const std::string& s );
+    Ident ( const std::string n ) ;
+    std::string get_name () const ;
     bool get_declare () const ;
     void put_declare () ;
     type_of_lex get_type () const ;
@@ -67,9 +69,6 @@ public:
 
 
 
-
-
-
 class Lex 
 {
     type_of_lex   lex_type;
@@ -78,31 +77,38 @@ public:
     Lex ( type_of_lex type = LEX_NULL, int value = 0 );
     type_of_lex  get_type () const ;
     int get_value () const ;
-    friend ostream & operator<< ( ostream &s, Lex l );
+    friend std::ostream & operator<< ( std::ostream &s, Lex l );
 };
+
+
 
 class Scanner
 {
+private:
     enum state {H, NAME, STRING, NUMBER, COMM, COMP, DIV, MULP, NEQ, DEL, IND};
     int lvl;
     int fd;
     int char_left;
+    
     char c;
     char buf[BUFSIZ];
     bool eof_flag;
+    
     void getc();
-    int lexfile;
+    
 public :
+    int char_in_str;
+    int lines;
     class my_exception 
     {
         public:
         enum errtype {lex,synt} ;
         int line;
-        string filename;
-        string error_message;
+        int sym;
+        std::string error_message;
         errtype error_type;
-        my_exception(int line,const char * filename,
-                string error_message1, errtype error_type);
+        my_exception(int line,int cs,
+                std::string error_message1, errtype error_type);
     };
     static const char * TD [23];
     static const char * TW [18];
@@ -110,5 +116,5 @@ public :
     Scanner( const char *prog);
     Lex get_lex();
     ~Scanner();
-    friend ostream & operator<< ( ostream &s, my_exception e );
+    friend std::ostream & operator<< ( std::ostream &s, my_exception e );
 };

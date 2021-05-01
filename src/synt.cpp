@@ -1,5 +1,6 @@
 // Синтаксический и семантический этапы 
 #include "synt.h"
+using namespace std;
 void Parser::gl()
 {
     curlex=get_lex();
@@ -32,7 +33,7 @@ Parser::Parser  (string initializer, const char * filename) :Scanner(filename)
         cout<<TT[(int)curtype];
     }
     else
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "Wrong initializer",
                     Scanner::my_exception::synt);
 } 
@@ -49,7 +50,7 @@ void Parser::single_input()
         case LEX_IF: case LEX_WHILE: case  LEX_FOR: case LEX_DEF:
             compound_stmt(); 
             if(curtype!=LEX_NEWLINE)
-                throw Scanner::my_exception(__LINE__,__FILE__,
+                throw Scanner::my_exception(lines,char_in_str,
                         "Single input : no newline after compound statement",
                                 Scanner::my_exception::synt);
                 //throw "Single input : no newline after compound statement";
@@ -92,7 +93,7 @@ void Parser::simple_stmt ()
     small_stmt();
     if (curtype!=LEX_NEWLINE )
     {
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                         "simple_stmt : no newline",
                                 Scanner::my_exception::synt);
         //throw "simple_stmt : no newline";
@@ -144,7 +145,7 @@ void Parser::flow_stmt ()
             testlist();
             return;
         default:
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                         "flow_stmt",
                                 Scanner::my_exception::synt);
             //throw "flow_stmt";
@@ -155,7 +156,7 @@ void Parser::flow_stmt ()
 void Parser::global_stmt()
 {
     if(curtype!=LEX_GLOBAL)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                         "global_stmt : curlex not global",
                                 Scanner::my_exception::synt);
         //throw "global_stmt : curlex not global";
@@ -166,7 +167,7 @@ void Parser::global_stmt()
     }
     else
     {
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                         "global_stmt : curlex not name",
                                 Scanner::my_exception::synt);
         //throw "global_stmt : curlex not name";
@@ -180,7 +181,7 @@ void Parser::global_stmt()
         }
         else
         {
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                         "global_stmt : no name after comma",
                                 Scanner::my_exception::synt);
             //throw "global_stmt : no name after comma";
@@ -197,7 +198,7 @@ void Parser::compound_stmt ()
     case LEX_WHILE  : while_stmt(); return;
     case LEX_FOR    : for_stmt();   return;
     case LEX_DEF    : funcdef();    return;
-    default         : throw Scanner::my_exception(__LINE__,__FILE__,
+    default         : throw Scanner::my_exception(lines,char_in_str,
                                 "compound_stmt wrong lexem ",
                                 Scanner::my_exception::synt);
                     //throw "compound_stmt";
@@ -207,13 +208,13 @@ void Parser::compound_stmt ()
 void Parser::funcdef()
 {
     if(curtype!=LEX_DEF)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "funcdef: no def",
                     Scanner::my_exception::synt);
             //throw "funcdef: no def";
     gl();
     if(curtype!=LEX_NAME)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "funcdef: no name",
                     Scanner::my_exception::synt);
         //throw "funcdef: no name";
@@ -221,7 +222,7 @@ void Parser::funcdef()
     gl();
     parameters();
     if(curtype!=LEX_COLON)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "funcdef: no colon",
                     Scanner::my_exception::synt);
         //throw "funcdef: no colon";
@@ -231,7 +232,7 @@ void Parser::funcdef()
 void Parser::parameters ()
 {
     if(curtype!=LEX_RLBRACKET)
-    throw Scanner::my_exception(__LINE__,__FILE__,
+    throw Scanner::my_exception(lines,char_in_str,
                     "parameters: no opening round bracket",
                     Scanner::my_exception::synt);
         //throw "parameters: no opening round bracket";
@@ -239,7 +240,7 @@ void Parser::parameters ()
     if(curtype==LEX_NAME)
         argslist(); //Реализован [argslist]
     if(curtype!=LEX_RRBRACKET)
-    throw Scanner::my_exception(__LINE__,__FILE__,
+    throw Scanner::my_exception(lines,char_in_str,
                     "parameters: no closing round bracket",
                     Scanner::my_exception::synt);
         //throw "parameters: no closing round bracket";
@@ -253,7 +254,7 @@ void Parser::argslist ()
     }
     else
     {
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                      "argslist : no name",
                     Scanner::my_exception::synt);
         //throw "argslist no name";
@@ -267,7 +268,7 @@ void Parser::argslist ()
         }
         else
         {
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "argslist: comma not followed by name",
                     Scanner::my_exception::synt);
             //throw "argslist: comma not followed by name";
@@ -277,14 +278,14 @@ void Parser::argslist ()
 void Parser::if_stmt ()
 {
     if(curtype!=LEX_IF)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "if_stmt: no if",
                     Scanner::my_exception::synt);
         //throw "if_stmt: no if";
     gl();
     test();
     if(curtype!=LEX_COLON)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "if_stmt: no colon after if <test>",
                     Scanner::my_exception::synt);
         //throw "if_stmt: no colon after if test";
@@ -295,7 +296,7 @@ void Parser::if_stmt ()
     {
         gl();
         if(curtype!=LEX_COLON)
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "if_stmt: no colon after else",
                     Scanner::my_exception::synt);
             //throw "if_stmt: no colon after else";
@@ -307,14 +308,14 @@ void Parser::if_stmt ()
 void Parser::while_stmt()
 {
     if(curtype!=LEX_WHILE)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "while_stmt: no while_stmt",
                     Scanner::my_exception::synt);
         //throw "while_stmt: no while_stmt";
     gl();   
     test();
     if(curtype!=LEX_COLON)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "while_stmt: no colon after <test>",
                     Scanner::my_exception::synt);
         //throw "while_stmt: no colon after <test>";
@@ -324,21 +325,21 @@ void Parser::while_stmt()
 void Parser::for_stmt()
 {
     if(curtype!=LEX_FOR)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "for_stmt: no while_stmt",
                     Scanner::my_exception::synt);
         //throw "for_stmt: no while_stmt";
     gl();   
     exprlist();
     if(curtype!=LEX_IN)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "for_stmt: no colon after test",
                     Scanner::my_exception::synt);
         //throw "for_stmt: no colon after test";
     gl();
     testlist();
     if(curtype!=LEX_COLON)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "for_stmt: no colon after testlist",
                     Scanner::my_exception::synt);
         //throw "for_stmt: no colon after testlist";
@@ -352,7 +353,7 @@ void Parser::suite ()
     {
         gl();
         if(curtype!=LEX_INDENT)
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "suite : no indent after newline",
                     Scanner::my_exception::synt);
             //throw "suite : no indent after newline";    
@@ -502,7 +503,7 @@ void Parser::atom ()
         gl();
         testlist(); //Реализовать [test]
         if(curtype!=LEX_RRBRACKET)
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "atom : no closing round bracket",
                     Scanner::my_exception::synt);
             //throw "atom : no closing round bracket";
@@ -514,7 +515,7 @@ void Parser::atom ()
         gl();
         testlist(); //Реализовать [test]
         if(curtype!=LEX_SRBRACKET)
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "atom : no closing square bracket",
                     Scanner::my_exception::synt);
             //throw "atom : no closing square bracket";
@@ -522,7 +523,7 @@ void Parser::atom ()
         return;
     }
     default:
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "atom : no right lex ",
                     Scanner::my_exception::synt);
         //throw "atom : no right lex ";
@@ -542,7 +543,7 @@ switch (curtype)
         if(curtype!=LEX_RRBRACKET)
             testlist();
         if(curtype!=LEX_RRBRACKET)
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "atom : no right lex ",
                     Scanner::my_exception::synt);    
             //throw "atom : no closing round bracket";
@@ -555,7 +556,7 @@ switch (curtype)
         if(curtype!=LEX_SRBRACKET)
             subscriptlist();  
         if(curtype!=LEX_SRBRACKET)
-            throw Scanner::my_exception(__LINE__,__FILE__,
+            throw Scanner::my_exception(lines,char_in_str,
                     "atom : no right lex ",
                     Scanner::my_exception::synt);
             //throw "atom : no closing square bracket";
@@ -569,7 +570,7 @@ void Parser::subscriptlist()
 {
     subscript();
     if(curtype!=LEX_COMMA)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "subscriptlist: no comma",
                     Scanner::my_exception::synt);
         //throw "subscriptlist: no comma";
@@ -590,7 +591,7 @@ void Parser::subscript ()
 void Parser::sliceop()
 {
     if(curtype!=LEX_COMMA)
-        throw Scanner::my_exception(__LINE__,__FILE__,
+        throw Scanner::my_exception(lines,char_in_str,
                     "subscriptlist: no comma",
                     Scanner::my_exception::synt);
         //throw "subscriptlist: no comma";
