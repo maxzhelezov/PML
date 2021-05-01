@@ -9,7 +9,7 @@ void Parser::gl()
 
 // initializer указывается через argv, file указывается в строке filename
 // Если single input, то ввод - stdin ( 0 )
-Parser::Parser  (string initializer, const char * filename) :Scanner(filename)
+Parser::Parser (string initializer, const char * filename) :Scanner(filename)
 {
     if(initializer=="file")
     {

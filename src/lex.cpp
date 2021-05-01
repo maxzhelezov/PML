@@ -61,8 +61,7 @@ int put ( const string & buf ) {
     return TID.size () - 1;
 }
 
-Lex::Lex ( type_of_lex type , int value )
-                : lex_type (type), lex_value (value)  { }
+Lex::Lex ( int lines, int number ,type_of_lex type , int value ) : lex_line(lines),lex_number(number),lex_type (type), lex_value (value)  { }
 
 type_of_lex  Lex::get_type () const { 
     return lex_type; 
@@ -130,6 +129,7 @@ Scanner::Scanner( const char* prog)
     eof_flag=false;  
     char_in_str=0;
     lines=1;
+    number=0;
     lvl=0;
     if( prog==NULL)
         fd=0;
@@ -230,8 +230,9 @@ Lex Scanner::get_lex () {
     {
         lvl--;
         dedent_left--;
+        number++;
         cerr<<TT[LEX_DEDENT]<<"\t";
-        return Lex(LEX_DEDENT);
+        return Lex(lines, number, LEX_DEDENT);
     }
     do
     {
@@ -251,9 +252,10 @@ Lex Scanner::get_lex () {
                 {
                     newline_flag=true;
                     char_in_str=0;
+                    number=0;
                     lines++;
                     cerr<<TT[LEX_NEWLINE]<<"\t";
-                    return Lex(LEX_NEWLINE);
+                    return Lex(lines, number, LEX_NEWLINE);
                 }
                 else if(c=='"')
                 {
@@ -301,7 +303,8 @@ Lex Scanner::get_lex () {
                 {
                     //cout<< "Success"<<endl;
                     //exit(0);
-                    return LEX_END;
+                    number++;
+                    return Lex(lines,number,LEX_END);
                 }
                 // Остались только char
                 else 
@@ -330,7 +333,8 @@ Lex Scanner::get_lex () {
                 {
                     cerr<<TT[LEX_STRING]<<"\t"<<charbuf;
                     j   = put ( charbuf );
-                    return Lex ( LEX_STRING, j );
+                    number++;
+                    return Lex( lines,number ,LEX_STRING, j );
                 }
                 break;
             }
@@ -346,13 +350,15 @@ Lex Scanner::get_lex () {
                     if ( (j = look ( charbuf, TW) ) ) 
                     {
                         cerr<<TT[(type_of_lex) ( j + (int) LEX_TW )]<<"\t";
-                        return Lex ( (type_of_lex) (j+(int) LEX_TW), j );
+                        number++;
+                        return Lex( lines,number ,(type_of_lex) (j+(int) LEX_TW), j );
                     }
                     else 
                     {
                         j   = put ( charbuf );
                         cerr<<TT[LEX_NAME]<<"\t";
-                        return Lex (LEX_NAME, j );
+                        number++;
+                        return Lex( lines,number,LEX_NAME, j );
                     }
                 }
                 break;
@@ -369,8 +375,9 @@ Lex Scanner::get_lex () {
                             Scanner::my_exception::lex);
                     char_left++; // Аналог ungetc в моей низкоуровневой буфферизации
                     char_in_str--;
+                    number++;
                     cerr<<TT[LEX_NUM]<<"\t";
-                    return Lex ( LEX_NUM, d );
+                    return Lex( lines,number ,LEX_NUM, d );
                 }
                 break;
             }
@@ -382,7 +389,8 @@ Lex Scanner::get_lex () {
                 {
                     //cout<< "Success"<<endl;
                     //exit(0);
-                    return LEX_END;
+                    number++;
+                    return Lex(lines,number,LEX_END);
                 }
                 //char_left++;
                 curstate=IND;
@@ -395,15 +403,17 @@ Lex Scanner::get_lex () {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
-                    return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                    number++;
+                    return Lex( lines,number ,(type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else 
                 {
                     char_left++;
                     char_in_str--;
+                    number++;
                     j   = look ( charbuf, TD );
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
-                    return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                    return Lex( lines,number ,(type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 break;
             }
@@ -413,16 +423,18 @@ Lex Scanner::get_lex () {
                 {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
+                    number++;
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
-                    return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                    return Lex( lines,number ,(type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else 
                 {
                     char_left++;
                     char_in_str--;
+                    number++;
                     j   = look ( charbuf, TD );
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
-                    return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                    return Lex( lines,number ,(type_of_lex) ( j + (int) LEX_TD ), j );
                 }
             }
             case MULP://DONE
@@ -431,16 +443,18 @@ Lex Scanner::get_lex () {
                 {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
+                    number++;
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
-                    return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                    return Lex( lines,number, (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else 
                 {
                     char_left++;
                     char_in_str--;
+                    number++;
                     j   = look ( charbuf, TD );
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )];
-                    return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                    return Lex( lines,number, (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 break;
             }
@@ -450,8 +464,9 @@ Lex Scanner::get_lex () {
                 {
                     charbuf.push_back ( c );
                     j   = look( charbuf, TD );
+                    number++;
                     cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
-                    return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                    return Lex( lines,number, (type_of_lex) ( j + (int) LEX_TD ), j );
                 }
                 else
                 {
@@ -469,9 +484,10 @@ Lex Scanner::get_lex () {
             {
                 char_left++;
                 char_in_str--;
+                number++;
                 j   = look( charbuf, TD );
                 cerr<<TT[(type_of_lex) ( j + (int) LEX_TD )]<<"\t";
-                return Lex ( (type_of_lex) ( j + (int) LEX_TD ), j );
+                return Lex( lines,number ,(type_of_lex) ( j + (int) LEX_TD ), j );
                 break;
             }
             case IND:
@@ -501,16 +517,18 @@ Lex Scanner::get_lex () {
                 {
                     cerr<<TT[LEX_INDENT]<<"\t";
                     lvl++;
+                    number++;
                     newline_flag=false;
-                    return Lex(LEX_INDENT);
+                    return Lex(lines,number,LEX_INDENT);
                 }
                 else if (curlvl<lvl)
                 {
                     cerr<<TT[LEX_DEDENT]<<"\t";
                     lvl--;
+                    number++;
                     dedent_left=lvl-curlvl;
                     newline_flag=false;
-                    return Lex(LEX_DEDENT);;
+                    return Lex(lines,number,LEX_DEDENT);;
                 }
                 /*else if(curlvl==lvl)
                 {
@@ -530,7 +548,8 @@ Lex Scanner::get_lex () {
                     {
                         //cout<< "Success"<<endl;
                         //exit(0);
-                        return LEX_END;
+                        number++;
+                        return Lex(lines,number,LEX_END);
                     }
                     curstate=H;
                     newline_flag=false;
@@ -560,7 +579,8 @@ Lex Scanner::get_lex () {
                 {
                     //cout<< "Success"<<endl;
                     //exit(0);
-                    return LEX_END;
+                    number++;
+                    return Lex(lines, number,LEX_END);
                 }
                 break;
             } //end of IND

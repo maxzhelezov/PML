@@ -71,10 +71,13 @@ public:
 
 class Lex 
 {
+    int           lex_line;
+    int           lex_number;
     type_of_lex   lex_type;
     int           lex_value;
+    
 public:
-    Lex ( type_of_lex type = LEX_NULL, int value = 0 );
+    Lex (int line=0,int number=0 ,type_of_lex type = LEX_NULL, int value = 0 );
     type_of_lex  get_type () const ;
     int get_value () const ;
     friend std::ostream & operator<< ( std::ostream &s, Lex l );
@@ -98,6 +101,7 @@ private:
     
 public :
     int char_in_str;
+    int number;
     int lines;
     class my_exception 
     {
