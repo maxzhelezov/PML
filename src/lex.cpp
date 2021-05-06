@@ -9,49 +9,74 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
-vector<Ident> TID;
+
+// Блок методов класса Ident 
 
 Ident::Ident() { 
         declared = false; 
         assigned = false; 
 }
 
+
 bool Ident::operator==( const string& s ) { 
     return name == s; 
 }
+
 Ident::Ident ( const string n ) {
     name    = n;
     declared = false; 
     assigned = false;
 }
 
+// Getter'ы класса Ident
+
 string Ident::get_name () const { 
     return name; 
 }
+
 bool Ident::get_declare () const { 
     return declared; 
 }
-void Ident::put_declare () { 
-    declared  = true; 
-}
-type_of_lex Ident::get_type () const { 
-    return type; 
-}
-void Ident::put_type ( type_of_lex t ) { 
-    type      = t; 
-}
+
 bool Ident::get_assign () const { 
     return assigned; 
 }
-void Ident::put_assign () { 
-    assigned  = true; 
-}
+
 int  Ident::get_value () const { 
     return value; 
 }
+
+// Setter'ы класса Ident
+
+type_of_lex Ident::get_type () const { 
+    return type; 
+}
+
+void Ident::put_type ( type_of_lex t ) { 
+    type      = t; 
+}
+
+void Ident::put_declare () { 
+    declared  = true; 
+}
+
+void Ident::put_assign () { 
+    assigned  = true; 
+}
+
 void Ident::put_value( int v ) { 
     value     = v; 
 }
+
+// Таблица идентификаторов
+std::vector<Ident>       TID;
+//int put ( const std::string & buf, std::vector<Ident>       TID) ;
+
+// Таблица строк
+std::vector<std::string> Strtbl;
+//int put ( const std::string & buf ,std::vector<std::string> Strtbl) ;
+
+
 int put ( const string & buf ) {
     vector<Ident>::iterator k;
  // такой синтаксис в cpp20
@@ -61,8 +86,15 @@ int put ( const string & buf ) {
     return TID.size () - 1;
 }
 
-Lex::Lex ( int lines, int number ,type_of_lex type , int value ) : lex_line(lines),lex_number(number),lex_type (type), lex_value (value)  { }
+// Методы класса Lex
+Lex::Lex ( int lines, int number ,type_of_lex type , int value ) : 
+            lex_line(lines),lex_number(number),
+            lex_type (type), lex_value (value)  
+{ 
 
+}
+
+// Getter'ы класса Ident
 type_of_lex  Lex::get_type () const { 
     return lex_type; 
 }
@@ -70,6 +102,16 @@ type_of_lex  Lex::get_type () const {
 int Lex::get_value () const { 
     return lex_value; 
 }
+
+int Lex::get_line() const{
+    return lex_line;
+}
+
+int Lex::get_number() const{
+    return lex_number;
+}
+
+// Вывод лексемы, нужен для вывода ошибок на более поздних этапах
 ostream & operator<< ( ostream &s, Lex l )
 {
     cout<<"Type equals "<<Scanner::TT[l.get_type()];
@@ -77,6 +119,7 @@ ostream & operator<< ( ostream &s, Lex l )
     return s;
 }
 
+// Класс exception - конструктор
 Scanner::my_exception::my_exception (int line1, int sym1,
         string error_message1,errtype error_type1)
 {
@@ -85,31 +128,50 @@ Scanner::my_exception::my_exception (int line1, int sym1,
     error_type=error_type1; 
     error_message=error_message1;
 }
+
+// Класс exception - вывод в ostream
 ostream & operator<< ( ostream &s, Scanner::my_exception e )
 {
-    s<<(e.error_type==Scanner::my_exception::lex?"Lex":"Synt");
-    s<<"  error at "<<endl<<"Line: "<< e.line<<endl<<"Sym : "<<e.sym<<endl;
-    s<<"Message: "<<e.error_message<<endl;
+    switch(e.error_type)
+    {
+        case Scanner::my_exception::file:
+        {
+            s<<"Problem connected with file, not code."<<endl;
+            s<<"Message: "<<e.error_message<<endl;
+            break;
+        }
+        case Scanner::my_exception::lex:
+        {
+            s<<"Lex mistake at: "<<endl<<"Line: "<< e.line<<endl;
+            s<<"Sym : "<<e.sym<<endl;
+            s<<"Message: "<<e.error_message<<endl;
+            break;
+        }
+        case Scanner::my_exception::synt:
+        {
+            s<<"Synt mistake at: "<<endl<<"Line: "<< e.line<<endl;
+            s<<"Lexem number: "<<e.sym<<endl;
+            s<<"Message: "<<e.error_message<<endl;
+            break;
+        }
+    }
     return s;
 }
+
+// Три таблицы класса Scanner
 const char * Scanner::TD [23] = { 
 
     "NULL","=", "<", ">" ,"==", "<=" ,">=", "!=", "+" ,"-" ,"*", 
-//   0      1    2    2+1   4    5     6     7     8    9    10  
     "/" ,"//" ,"%" ,"**","(" ,")" ,"[" ,"]" ,";", "," ,":" ,"."
-//   11   12    13    14  15   16   17   18  19   20   21   22
 };
 const char * Scanner::TW [18]={ 
     "NULL" ,  "None" , "True" , "False", "global" ,
-//   0         1        2        3        4
     "def", "return" , "while" ,  "for" , "continue" , "pass" , "break", 
-//   5      6          7          8       9            10       11
     "if" ,"else",  "not" , "and" ,  "in" ,  "or" 
-//   12    13       14      15       16      17
 
 };
-const char * Scanner::TT [POLIZ_FGO +1]={
-//  Соответствующие лексемам слова, нужны для удобного вывода 
+//  Соответствующие лексемам слова, нужны для удобного вывода
+const char * Scanner::TT [POLIZ_FGO +1]={ 
     "LEX_NULL", "LEX_TW ", "LEX_NONE ", "LEX_TRUE ", "LEX_FALSE ", "LEX_GLOBAL ",
     "LEX_DEF ", "LEX_RET ", "LEX_WHILE ", "LEX_FOR ",  "LEX_CONT ", "LEX_PASS ", "LEX_BREAK ",  
     "LEX_IF ", "LEX_ELSE ",  "LEX_NOT ", "LEX_AND ", "LEX_IN ", "LEX_OR ",                                 
@@ -122,14 +184,13 @@ const char * Scanner::TT [POLIZ_FGO +1]={
     "LEX_NEWLINE ", "LEX_END ",
     "POLIZ_LABEL ", "POLIZ_ADDRESS ", "POLIZ_GO " , "POLIZ_FGO "                                                                                 
 };
+
+// Конструктор  класса Scanner - открывает файл на чтение и выставляет флаги
 // Если prog NULL, то stdin ( 0 )
 Scanner::Scanner( const char* prog)
 {
     char_left=0;
     eof_flag=false;  
-    char_in_str=0;
-    lines=1;
-    number=0;
     lvl=0;
     if( prog==NULL)
         fd=0;
@@ -137,16 +198,20 @@ Scanner::Scanner( const char* prog)
         fd=open(prog,O_RDONLY);
     if(fd==-1)
     {
-        throw Scanner::my_exception(lines,char_in_str,
+        throw Scanner::my_exception(0,0,
                     "Can't open file",
                     Scanner::my_exception::lex);
     }
-
 }
+
+// Деструктор - только закрывает файл
 Scanner::~Scanner()
 {
     close (fd);
 }
+
+// Метод поиска строки buf в List
+// Нужен для определения лексемы по строке 
 int look ( const string buf, const char ** list ) {
     int i = 0;
     while ( list[i] ) {
@@ -156,9 +221,17 @@ int look ( const string buf, const char ** list ) {
     }
     return 0;
 }
+
+// Метод getc :
+// Заполняет низкоуровневый буффер и выдаёт символ из него.
 void Scanner::getc()
 {
     static int char_scanned;
+    if(eof_flag)
+    {
+        c=EOF;
+        return;
+    }
     if(char_left==0 && eof_flag==false)
     {
         if (eof_flag)
@@ -170,11 +243,9 @@ void Scanner::getc()
         char_scanned=char_left;
         if(char_scanned<0)
         {
-            //throw Error();
-            throw Scanner::my_exception(lines,char_in_str,
+            throw Scanner::my_exception(0,0,
                     "Problem when reading from file",
                     Scanner::my_exception::lex);
-            //cerr<<"Oops"<<char_in_str<<lines<<endl;
         }
         if(char_scanned==0)
         {
@@ -182,23 +253,17 @@ void Scanner::getc()
             c= EOF;
             return;
         }
-        if(char_scanned<BUFSIZ)
-        {
-            //eof_flag=true;
-        }
     }
     else if(eof_flag&& char_left==0)
     {
         eof_flag=true;
         c= EOF;
-        //cerr<<" char is EOF"<<c<<endl;
         return;
     }
     c=this->buf[char_scanned-char_left];
-    
-    //cerr<<" char is "<<c<<endl;
     char_left--;
 }
+
 bool isdigit(char c)
 {
     switch (c)
@@ -209,23 +274,31 @@ bool isdigit(char c)
         default:return false;
     }
 }
-bool isspace(char c)
-{
-    switch (c)
-    {
-        case '\r':case ' ': case '\t': //case '3': case '4':
-        //case '5':case '6': case '7': case '8': case '9':
-        return true;
-        default:return false;
-    }
-}
+
+// Метод, возвращающий лексему в соответствии с имеющимся автоматом.
 
 Lex Scanner::get_lex () {
-    int  d,i, j;
-    static int dedent_left=0;
+    int  d,i, j,strlength;
+    static int dedent_left=0;    // Кол-во набраных Dedent
+/*
+    Поясним необходимость данной переменной на следующем примере
+    for i in 100:
+        for j in 10:
+            c++
+    print(c)
+    
+    После c++ пришло 2 отступа вниз, это не ошибка. 
+    Нужно вернуть 2 отступа. Разумеется при двух разных обращениях к методу.
+    Сделать это можно лишь при помощи данной переменной.
+*/
+    // Следующие 4 переменные нужны для объяснения ошибок пользователю 
+    static int char_in_str=0;    // Номер символа в строке
+    static int number     =0;    // Номер лексемы
+    static int lines      =1;    // Номер строки
     static bool newline_flag=false;
-    string  charbuf;
-    state   curstate = newline_flag?IND:H ;
+
+    string  charbuf;     // Буфер для заполнения имени переменной.
+    state   curstate ;
     if(dedent_left>0)
     {
         lvl--;
@@ -234,10 +307,13 @@ Lex Scanner::get_lex () {
         cerr<<TT[LEX_DEDENT]<<"\t";
         return Lex(lines, number, LEX_DEDENT);
     }
+    curstate = newline_flag?IND:H ;
     do
     {
         getc();
+        cerr<< endl<<(int)c<<endl;
         char_in_str++;
+        cerr<< curstate;
         switch(curstate)
         {
             case H:
@@ -259,6 +335,7 @@ Lex Scanner::get_lex () {
                 }
                 else if(c=='"')
                 {
+                    strlength=0;
                     curstate=STRING;
                 }
                 else if(isdigit(c)) //NUMBER //DONE
@@ -301,8 +378,6 @@ Lex Scanner::get_lex () {
                 //END
                 else if(c==EOF) //DONE
                 {
-                    //cout<< "Success"<<endl;
-                    //exit(0);
                     number++;
                     return Lex(lines,number,LEX_END);
                 }
@@ -323,14 +398,18 @@ Lex Scanner::get_lex () {
                         throw Scanner::my_exception(lines,char_in_str,
                                 "String : unexpected end of string",
                                 Scanner::my_exception::lex);
-                        //cerr<<" Lex mistake:"<< " String unexpected end of string ";
-                        //cerr<<endl<<char_in_str<<lines<<endl;
-                        //exit(0);
                     }
+                    strlength++;
                     charbuf.push_back (c); 
                 }
                 else
                 {
+                    if(strlength==0)
+                    {
+                        throw Scanner::my_exception(lines,char_in_str,
+                                "String : empty string",
+                                Scanner::my_exception::lex);
+                    }
                     cerr<<TT[LEX_STRING]<<"\t"<<charbuf;
                     j   = put ( charbuf );
                     number++;
@@ -340,13 +419,13 @@ Lex Scanner::get_lex () {
             }
             case NAME:
             {
-                if ( isalpha (c) || isdigit (c) ) {
+                if ( c!=EOF&&(isalpha (c) || isdigit (c) )) {
                     charbuf.push_back (c); 
                 }
                 else {
+                    // ~ungetc
                     char_left++;
                     char_in_str--;
-                    //cerr<<charbuf<<endl;
                     if ( (j = look ( charbuf, TW) ) ) 
                     {
                         cerr<<TT[(type_of_lex) ( j + (int) LEX_TW )]<<"\t";
@@ -355,6 +434,7 @@ Lex Scanner::get_lex () {
                     }
                     else 
                     {
+                        cerr<<"AVX"<<charbuf<<"EFD"<<endl;
                         j   = put ( charbuf );
                         cerr<<TT[LEX_NAME]<<"\t";
                         number++;
@@ -373,7 +453,8 @@ Lex Scanner::get_lex () {
                         throw Scanner::my_exception(lines,char_in_str,
                             "Wrong lex identifier ",
                             Scanner::my_exception::lex);
-                    char_left++; // Аналог ungetc в моей низкоуровневой буфферизации
+                    // ~ungetc
+                    char_left++; 
                     char_in_str--;
                     number++;
                     cerr<<TT[LEX_NUM]<<"\t";
@@ -387,12 +468,9 @@ Lex Scanner::get_lex () {
                     getc();
                 if(c==EOF)
                 {
-                    //cout<< "Success"<<endl;
-                    //exit(0);
                     number++;
                     return Lex(lines,number,LEX_END);
                 }
-                //char_left++;
                 curstate=IND;
                 break;
             }
@@ -408,6 +486,7 @@ Lex Scanner::get_lex () {
                 }
                 else 
                 {
+                    // ~ungetc
                     char_left++;
                     char_in_str--;
                     number++;
@@ -429,6 +508,7 @@ Lex Scanner::get_lex () {
                 }
                 else 
                 {
+                    // ~ungetc
                     char_left++;
                     char_in_str--;
                     number++;
@@ -449,6 +529,7 @@ Lex Scanner::get_lex () {
                 }
                 else 
                 {
+                    // ~ungetc
                     char_left++;
                     char_in_str--;
                     number++;
@@ -473,15 +554,12 @@ Lex Scanner::get_lex () {
                     throw Scanner::my_exception(lines,char_in_str,
                                 "No = after !",
                                 Scanner::my_exception::lex);
-                    //cerr<<" Lex :"<< " No = after ! ";
-                    //cerr<<endl<<char_in_str<<lines<<endl;
-                    //exit(0);
-                    //
                 }
                 break;
             }
             case DEL: //DONE
             {
+                // ~ungetc
                 char_left++;
                 char_in_str--;
                 number++;
@@ -504,14 +582,12 @@ Lex Scanner::get_lex () {
                             throw Scanner::my_exception(lines,char_in_str,
                                 "Wrong INDENT size",
                                 Scanner::my_exception::lex);
-                            //cerr<<" Wrong INDENT size , "<<i+1<<" spaces only ";
-                            //cerr<<endl<<char_in_str<<lines<<endl;
-                            //exit(0);
                         }
                     }
                     getc();
                 }
-                char_left++; // Аналог ungetc в моей низкоуровневой буфферизации
+                // ~ungetc
+                char_left++; 
                 char_in_str--;
                 if (curlvl==lvl+1)
                 {
@@ -530,24 +606,11 @@ Lex Scanner::get_lex () {
                     newline_flag=false;
                     return Lex(lines,number,LEX_DEDENT);;
                 }
-                /*else if(curlvl==lvl)
-                {
-                    //getc();
-                    if(c==EOF)
-                    {
-                        cout<< "Success"<<endl;
-                        exit(0);
-                    }
-                    newline_flag=true;
-                    cerr<<TT[LEX_NEWLINE];
-                    return Lex(LEX_NEWLINE);
-                }*/
                 else if(newline_flag)
                 {
                     if(c==EOF)
                     {
-                        //cout<< "Success"<<endl;
-                        //exit(0);
+
                         number++;
                         return Lex(lines,number,LEX_END);
                     }
@@ -577,8 +640,7 @@ Lex Scanner::get_lex () {
                 }
                 if(c==EOF)
                 {
-                    //cout<< "Success"<<endl;
-                    //exit(0);
+
                     number++;
                     return Lex(lines, number,LEX_END);
                 }

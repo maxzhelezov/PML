@@ -4,17 +4,21 @@
 #include <vector>
 #include <cstdio>
 #include "lex.h"
+
 extern std::vector<Ident> TID;
+
 class Parser: public Scanner
 {
-    bool file_input_flag;
-    public:
-    Lex curlex;
-    type_of_lex curtype;
-    void gl();
+    bool file_input_flag;     // Флаг ввода через файл
+public:               
+    Lex curlex;               // Текущая лексема
+    type_of_lex curtype;      // Тип текущей лексемы
+    void gl();                // Метод считывания лексемы и её типа
     Parser(std::string initializer, const char * filename=NULL);
     // Вместо start используется конструктор
     // void start (); 
+    // Всё далее - нетерминалы, они же - левые части правил грамматики.
+
     void single_input(); 
     void file_input(); 
     void stmt (); 

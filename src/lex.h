@@ -2,14 +2,15 @@
 // Лексический этап 
 #include <iostream>
 #include <vector>
-#include <string>
+//#include <string>
 #include <cstdio>
-#include <string>
+//#include <string>
 
 
 
 enum type_of_lex {
-//  Программные лексемы - члены таблицы TD
+//  Программные лексемы - члены таблицы TW
+//  Важно, что их порядок совпадает с порядком строк в TW
     LEX_NULL, LEX_TW, LEX_NONE, LEX_TRUE, LEX_FALSE, LEX_GLOBAL,
 //  0         1       2         3         4          5
     LEX_DEF, LEX_RET, LEX_WHILE, LEX_FOR,  LEX_CONT, LEX_PASS, LEX_BREAK,  
@@ -18,39 +19,34 @@ enum type_of_lex {
 //  13      14         15       16       17      18
 
 
-// Члены таблицы TD                                   
+// Члены таблицы TD 
+//  Важно, что их порядок совпадает с порядком строк в TD                           
     LEX_TD,
-//  19
     LEX_ASSIGN, LEX_LSS, LEX_GTR, LEX_EQ, LEX_LEQ,  LEX_GEQ, LEX_NEQ,
-//  20          21       22       23      24        25       26
     LEX_PLUS, LEX_MINUS, LEX_TIMES, LEX_SLASH, LEX_DSLASH, LEX_PERC, LEX_POW,
-//  27        28         29         30         31          32        33
 // Первый символ S == square, R == round , второй == left / right DONE
     LEX_RLBRACKET, LEX_RRBRACKET, LEX_SLBRACKET, LEX_SRBRACKET,   
-//  34             35             36             37
     LEX_SEMICOLON, LEX_COMMA, LEX_COLON, LEX_DOT,
-//  38             39         40         41
-
 
 //  Атомы
     LEX_NAME, LEX_NUM, LEX_STRING, LEX_INDENT, LEX_DEDENT, LEX_NEWLINE, LEX_END,       
-//  41        42       43          44        45        46
-                                                                                        
-    POLIZ_LABEL,                                                                                /*47*/
-    POLIZ_ADDRESS,                                                                              /*48*/
-    POLIZ_GO,                                                                                   /*49*/
-    POLIZ_FGO                                                                                   /*50*/
+//  Необходимая для полиза часть.                                                                                 
+    POLIZ_LABEL,                                                                                
+    POLIZ_ADDRESS,                                                                              
+    POLIZ_GO,                                                                                   
+    POLIZ_FGO                                                                                   
 };
 
-
+//  Класс  Ident - нужен для создания таблицы идентификаторов 
+//
 
 class Ident
 {
-    std::string name;
+    std::string name; // имя
     type_of_lex type;
-    int value;
-    bool declared;
-    bool assigned;
+    int value;        // значение
+    bool declared;    // факт  объявления
+    bool assigned;    // факт  присвоения значения
 public:
     Ident();
     bool operator== ( const std::string& s );
@@ -68,7 +64,6 @@ public:
 };
 
 
-
 class Lex 
 {
     int           lex_line;
@@ -80,45 +75,48 @@ public:
     Lex (int line=0,int number=0 ,type_of_lex type = LEX_NULL, int value = 0 );
     type_of_lex  get_type () const ;
     int get_value () const ;
+    int get_line() const;
+    int get_number() const;
     friend std::ostream & operator<< ( std::ostream &s, Lex l );
 };
-
 
 
 class Scanner
 {
 private:
+    // Тип состояния автомата
     enum state {H, NAME, STRING, NUMBER, COMM, COMP, DIV, MULP, NEQ, DEL, IND};
-    int lvl;
-    int fd;
-    int char_left;
-    
-    char c;
-    char buf[BUFSIZ];
-    bool eof_flag;
-    
-    void getc();
+    int lvl;          // Переменная кол-ва отступов ident
+    int fd;           // Дескриптор файла из которого читается программа   
+    char c;           // Текущий символ
+    int char_left;    // Кол-во символов в буфере
+    char buf[BUFSIZ]; // Буфер
+    bool eof_flag;    // Признак конца файла
+// Метод, возвращающий символ из буфера, предварительно заполняющий его.
+    void getc();      
     
 public :
-    int char_in_str;
-    int number;
-    int lines;
+    
+    // Класс исключения
     class my_exception 
     {
         public:
-        enum errtype {lex,synt} ;
-        int line;
-        int sym;
+        enum errtype {lex,synt,file} ;
+        int line;    // Номер строки
+        int sym;     // Номер символа в строке
         std::string error_message;
         errtype error_type;
         my_exception(int line,int cs,
                 std::string error_message1, errtype error_type);
     };
-    static const char * TD [23];
-    static const char * TW [18];
-    static const char * TT [POLIZ_FGO +1];
+    // Таблицы с строковым описанием 
+    static const char * TD [23];  //
+    static const char * TW [18];  // 
+    static const char * TT [POLIZ_FGO+1]; //
     Scanner( const char *prog);
-    Lex get_lex();
+    // Метод, возвращающий лексему либо выдающий ошибку, если
+    // нарушено правило автомата.
+    Lex get_lex();          
     ~Scanner();
     friend std::ostream & operator<< ( std::ostream &s, my_exception e );
 };
