@@ -426,7 +426,7 @@ Lex Scanner::get_lex () {
             }
             case NAME:
             {
-                if (isalpha (c) || isdigit (c) ) {
+                if (isalpha (c) || isdigit (c) ||c=='_') {
                     charbuf.push_back (c); 
                 }
                 else {
@@ -583,6 +583,7 @@ Lex Scanner::get_lex () {
                     for(i=0;i<3;i++)
                     {
                         getc();
+                        char_in_str++;
                         if(c!=' ')
                         {
                             throw Scanner::my_exception(lines,char_in_str,
@@ -591,10 +592,12 @@ Lex Scanner::get_lex () {
                         }
                     }
                     getc();
+                    char_in_str++;
                 }
                 // ~ungetc
                 char_left++; 
                 char_in_str--;
+                
                 if (curlvl==lvl+1)
                 {
                     cerr<<TT[LEX_INDENT]<<"\t";

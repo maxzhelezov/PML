@@ -122,7 +122,7 @@ void Parser::small_stmt ()
             return;
         case LEX_PASS:
 //pass block
-
+            gl();
             return;
         case LEX_GLOBAL:
             global_stmt();
@@ -152,11 +152,11 @@ void Parser::flow_stmt ()
         // break and cont block
         case LEX_BREAK: 
         case LEX_CONT: 
-        gl();
+        gl();           // Считали слово cont либо break
         return;
 
-//Стоит ли ?
         case  LEX_RET: 
+            gl();       // Считали слово return
             testlist();
             return;
         default:
