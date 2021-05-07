@@ -70,13 +70,6 @@ void Ident::put_value( int v ) {
 
 // Таблица идентификаторов
 std::vector<Ident>       TID;
-//int put ( const std::string & buf, std::vector<Ident>       TID) ;
-
-// Таблица строк
-std::vector<std::string> Strtbl;
-//int put ( const std::string & buf ,std::vector<std::string> Strtbl) ;
-
-
 int put ( const string & buf ) {
     vector<Ident>::iterator k;
  // такой синтаксис в cpp20
@@ -85,6 +78,21 @@ int put ( const string & buf ) {
     TID.push_back ( Ident(buf) );
     return TID.size () - 1;
 }
+
+// Таблица строк
+vector<string> Strtbl;
+
+int put_str ( const string & buf ) {
+    vector<string>::iterator k;
+ // такой синтаксис в cpp20
+    if ( ( k = find( Strtbl.begin(), Strtbl.end(), buf ) ) != Strtbl.end () )
+        return k - Strtbl.begin();
+    Strtbl.push_back ( string(buf) );
+    return Strtbl.size () - 1;
+}
+
+
+
 
 // Методы класса Lex
 Lex::Lex ( int lines, int number ,type_of_lex type , int value ) : 
@@ -200,7 +208,7 @@ Scanner::Scanner( const char* prog)
     {
         throw Scanner::my_exception(0,0,
                     "Can't open file",
-                    Scanner::my_exception::lex);
+                    Scanner::my_exception::file);
     }
 }
 
@@ -245,7 +253,7 @@ void Scanner::getc()
         {
             throw Scanner::my_exception(0,0,
                     "Problem when reading from file",
-                    Scanner::my_exception::lex);
+                    Scanner::my_exception::file);
         }
         if(char_scanned==0)
         {
@@ -288,7 +296,8 @@ Lex Scanner::get_lex () {
     print(c)
     
     После c++ пришло 2 отступа вниз, это не ошибка. 
-    Нужно вернуть 2 отступа. Разумеется при двух разных обращениях к методу.
+    Нужно вернуть 2 отступа. Разумеется при двух разных (последовательных) 
+    обращениях к методу.
     Сделать это можно лишь при помощи данной переменной.
 */
     // Следующие 4 переменные нужны для объяснения ошибок пользователю 
@@ -311,9 +320,7 @@ Lex Scanner::get_lex () {
     do
     {
         getc();
-        cerr<< endl<<(int)c<<endl;
         char_in_str++;
-        cerr<< curstate;
         switch(curstate)
         {
             case H:
@@ -411,7 +418,7 @@ Lex Scanner::get_lex () {
                                 Scanner::my_exception::lex);
                     }
                     cerr<<TT[LEX_STRING]<<"\t"<<charbuf;
-                    j   = put ( charbuf );
+                    j   = put_str ( charbuf );
                     number++;
                     return Lex( lines,number ,LEX_STRING, j );
                 }
@@ -419,7 +426,7 @@ Lex Scanner::get_lex () {
             }
             case NAME:
             {
-                if ( c!=EOF&&(isalpha (c) || isdigit (c) )) {
+                if (isalpha (c) || isdigit (c) ) {
                     charbuf.push_back (c); 
                 }
                 else {
@@ -434,7 +441,6 @@ Lex Scanner::get_lex () {
                     }
                     else 
                     {
-                        cerr<<"AVX"<<charbuf<<"EFD"<<endl;
                         j   = put ( charbuf );
                         cerr<<TT[LEX_NAME]<<"\t";
                         number++;

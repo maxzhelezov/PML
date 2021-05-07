@@ -9,7 +9,7 @@ extern std::vector<Ident> TID;
 
 class Parser: public Scanner
 {
-    bool file_input_flag;     // Флаг ввода через файл
+    //bool file_input_flag;     // Флаг ввода через файл
 public:               
     Lex curlex;               // Текущая лексема
     type_of_lex curtype;      // Тип текущей лексемы

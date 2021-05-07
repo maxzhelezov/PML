@@ -63,13 +63,15 @@ public:
 
 };
 
+//  Класс лексемы  
 
 class Lex 
 {
-    int           lex_line;
-    int           lex_number;
-    type_of_lex   lex_type;
-    int           lex_value;
+    int           lex_line;   // Номер строки в которой встретилась лексема
+    int           lex_number; // Порядковый номер лексемы в этой строке
+    type_of_lex   lex_type;   // Тип лексемы
+    int           lex_value;  // Значение лексемы
+    // Например номер идентификатора в TID
     
 public:
     Lex (int line=0,int number=0 ,type_of_lex type = LEX_NULL, int value = 0 );

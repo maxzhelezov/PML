@@ -648,13 +648,11 @@ switch (curtype)
 void Parser::subscriptlist()
 {
     subscript();
-    if(curtype!=LEX_COMMA)
-        throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
-                    "subscriptlist: no comma",
-                    Scanner::my_exception::synt);
-        //throw "subscriptlist: no comma";
-    gl();
-    subscript();
+    while(curtype==LEX_COMMA)
+    {
+        gl();
+        subscript();
+    }
 } 
 void Parser::subscript ()
 {
