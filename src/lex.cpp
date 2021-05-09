@@ -180,12 +180,13 @@ const char * Scanner::TW [18]={
 };
 //  Соответствующие лексемам слова, нужны для удобного вывода
 const char * Scanner::TT [POLIZ_FGO +1]={ 
-    "LEX_NULL", "LEX_TW ", "LEX_NONE ", "LEX_TRUE ", "LEX_FALSE ", "LEX_GLOBAL ",
-    "LEX_DEF ", "LEX_RET ", "LEX_WHILE ", "LEX_FOR ",  "LEX_CONT ", "LEX_PASS ", "LEX_BREAK ",  
-    "LEX_IF ", "LEX_ELSE ",  "LEX_NOT ", "LEX_AND ", "LEX_IN ", "LEX_OR ",                                 
-    "LEX_TD ",
-    "LEX_ASSIGN ", "LEX_LSS ", "LEX_GTR ", "LEX_EQ ", "LEX_LEQ ",  "LEX_GEQ ", "LEX_NEQ ",
-    "LEX_PLUS ", "LEX_MINUS ", "LEX_TIMES ", "LEX_SLASH ", "LEX_DSLASH ", "LEX_PERC ", "LEX_POW ",
+    "LEX_NULL", "LEX_TW ", "LEX_NONE ", "LEX_TRUE ", "LEX_FALSE ", 
+    "LEX_GLOBAL ", "LEX_DEF ", "LEX_RET ", "LEX_WHILE ", "LEX_FOR ",
+    "LEX_CONT ", "LEX_PASS ", "LEX_BREAK ", "LEX_IF ", "LEX_ELSE ",
+    "LEX_NOT ", "LEX_AND ", "LEX_IN ", "LEX_OR ", "LEX_TD ", "LEX_ASSIGN ",
+    "LEX_LSS ", "LEX_GTR ", "LEX_EQ ", "LEX_LEQ ",  "LEX_GEQ ", "LEX_NEQ ",
+    "LEX_PLUS ", "LEX_MINUS ", "LEX_TIMES ", "LEX_SLASH ", "LEX_DSLASH ",
+    "LEX_PERC ", "LEX_POW ",
     "LEX_RLBRACKET ", "LEX_RRBRACKET ", "LEX_SLBRACKET ", "LEX_SRBRACKET ",   
     "LEX_SEMICOLON ", "LEX_COMMA ", "LEX_COLON ", "LEX_DOT ",
     "LEX_NAME ", "LEX_NUM ", "LEX_STRING ", "LEX_INDENT ", "LEX_DEDENT ", 
