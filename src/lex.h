@@ -1,11 +1,11 @@
 // header
 // Лексический этап 
+#ifndef __HEADER__LEX
+#define __HEADER__LEX
+
 #include <iostream>
 #include <vector>
-//#include <string>
 #include <cstdio>
-//#include <string>
-
 
 
 enum type_of_lex {
@@ -122,3 +122,4 @@ public :
     ~Scanner();
     friend std::ostream & operator<< ( std::ostream &s, my_exception e );
 };
+#endif

@@ -1,5 +1,8 @@
 // Header 
 // Синтаксический и семантический этапы
+#ifndef __HEADER__SYNT
+#define __HEADER__SYNT
+
 #include <iostream>
 #include <vector>
 #include <cstdio>
@@ -51,3 +54,5 @@ public:
     void subscript ();
     void sliceop(); 
 };
+
+#endif
