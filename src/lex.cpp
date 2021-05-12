@@ -598,7 +598,12 @@ Lex Scanner::get_lex () {
                 // ~ungetc
                 char_left++; 
                 char_in_str--;
-                
+                if(curlvl>lvl+1)
+                {
+                    throw Scanner::my_exception(lines,char_in_str,
+                                "INDENT is too big",
+                                Scanner::my_exception::lex);
+                }
                 if (curlvl==lvl+1)
                 {
                     cerr<<TT[LEX_INDENT]<<"\t";
