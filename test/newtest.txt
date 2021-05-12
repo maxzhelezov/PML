@@ -1,0 +1,8 @@
+for i in 20:
+    for j in 30:
+        a+b
+    b+a
+        c+d
+a+=d
+print(a)
+

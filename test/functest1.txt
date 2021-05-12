@@ -1,0 +1,2 @@
+def func (x,t  :
+    return 1

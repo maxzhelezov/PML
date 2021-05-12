@@ -1,0 +1,3 @@
+global 1
+for i in if 100 < 200 else 560
+
