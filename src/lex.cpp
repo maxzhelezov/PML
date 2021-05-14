@@ -176,7 +176,13 @@ ostream & operator<< ( ostream &s, Scanner::my_exception e )
             s<<"Message: "<<e.error_message<<endl;
             break;
         }
-    }
+        case Scanner::my_exception::exec:
+        {
+            s<<"Runtime mistake" << endl;
+            s<<"Type error: "<<e.error_message<<endl;
+            break;
+        }
+ }
     return s;
 }
 

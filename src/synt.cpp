@@ -453,10 +453,13 @@ void Parser::and_test()
 
 void Parser::not_test ()
 {
+    Lex lex;
     if( curtype==LEX_NOT)
     {
+        lex = curlex;
         gl();
         not_test();
+        poliz.push_back(lex);
     }
     else
         comparison();
@@ -466,15 +469,18 @@ void Parser::comparison ()
 {
     bool comparison_found;
     arith_expr();
+    Lex lex;
     //Равносильно равенству одному из
 // '>' | '<' | '==' | '>='| '<=' | '!=' | 'in' | 'not' | 'in'
     comparison_found=((int)curtype>=(int)LEX_LSS&&(int)curtype<=(int)LEX_NEQ)||
         ((int)curtype>=(int)LEX_NOT&&(int)curtype<=(int)LEX_OR);
     while(comparison_found)
     {
+        lex = curlex;
         // Считали символ - сравнение
         gl();
         arith_expr();
+        poliz.push_back(lex);
         // Снова проверка -тот ли символ
         comparison_found=((int)curtype>=LEX_LSS&&(int)curtype<=LEX_NEQ)||
             ((int)curtype>=LEX_NOT&&(int)curtype<=LEX_OR);
@@ -585,9 +591,9 @@ void Parser::atom ()
     int size;
     switch (curtype)
     {
-        case LEX_TRUE:  gl(); return;
-        case LEX_NONE:  gl(); return;
-        case LEX_FALSE: gl(); return;
+        case LEX_TRUE:  poliz.push_back(curlex); gl(); return;
+        case LEX_NONE:  poliz.push_back(curlex); gl(); return;
+        case LEX_FALSE: poliz.push_back(curlex); gl(); return;
         case LEX_NAME: poliz.push_back(Lex(0,0,POLIZ_LOAD_LOC, curlex.get_value()));
                                gl(); return;
         case LEX_NUM: poliz.push_back(curlex);  gl(); return;

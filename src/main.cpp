@@ -37,7 +37,7 @@ int main (int argc,char * argv[])
     }
     catch (Scanner::my_exception &e)
     {
-        cerr<<endl<<endl<<e;
+        cerr<<endl<<endl<<e << endl;
         return 1;
     }
     cout<<endl<<"Programm has been successfully compiled"<<endl;

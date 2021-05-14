@@ -111,7 +111,7 @@ public :
     class my_exception 
     {
         public:
-        enum errtype {lex,synt,file} ;
+        enum errtype {lex,synt,file,exec} ;
         int line;    // Номер строки
         int sym;     // Номер символа в строке
         std::string error_message;
