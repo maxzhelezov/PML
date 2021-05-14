@@ -1,0 +1,10 @@
+print((1+1)**8)
+i=100**2
+print(i**2)
+for i in 20:
+    j=100
+    for i in 20:
+        1=1
+        for i in 30:
+        1+1
+print(j)

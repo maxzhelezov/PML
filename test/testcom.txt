@@ -1,0 +1,8 @@
+1+1 # Works fine
+for j in 20: #Still works fine
+#No problem here
+    i=c+1
+ #And here
+    j=j+i
+print(i)
+ #No problems yet

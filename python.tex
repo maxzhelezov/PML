@@ -1,0 +1,207 @@
+\documentclass[russian,a4paper]{article}
+\usepackage[russian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{graphicx}  
+
+\pagestyle{empty}
+
+\textwidth=17cm
+\hoffset=0cm
+\voffset=0cm
+\headheight=0cm
+\topmargin=0cm
+\oddsidemargin=0cm
+
+%
+% Описание команды для отображения пустой
+% цепочки
+%
+\newcommand{\eps}{\varepsilon}
+
+%
+% Команда для отображения 
+% нетерминального символа. 
+% Он голубеньким подсвечивается
+%
+\newcommand{\ns}[1]{\textcolor{blue}{<#1>}}
+\newcommand{\ls}[1]{\textcolor{red}{<#1>}}
+
+%
+% Терминал, он просто чёрный
+%
+\newcommand{\ts}[1]{<#1>}
+
+\title{Грамматика для модельного языка Python}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%
+% Вариант 1
+%
+\section{Введение}
+
+Сперва будет описана контекстно свободная грамматика, которая собственно задаёт синтаксис 
+модельного языка Python, а затем к ней будет описан язык задания лексем языка с помощью конечного автомата с действиями.
+
+\section{Описание контекстно свободной грамматики}
+
+Грамматика состоит из следующих нетерминальных символов.
+\begin{itemize}
+\item \ns{start} - стартовый символ грамматики
+\item \ns{single\_input}  - на вход программы поступает файл
+\item \ns{file\_input} -- программа запущена в интерактивном режиме
+ \item \ns{stmt}  -- оператор языка.
+ \item \ns{simple\_stmt}  -- простой оператор, состоящий из малых операторов и перевода строки.
+ \item \ns{small\_stmt}  -- состоит из оператора-выражения и других операторов.
+ \item \ns{expr\_stmt}  -- оператор - выражение на языке.
+ \item \ns{pass\_stmt}  -- оператор пропуска.
+ \item \ns{flow\_stmt}  -- оператор управления потоком вычисления.
+ \item \ns{break\_stmt}  -- оператор досрочного выхода из цикла.
+ \item \ns{continue\_stmt}  -- оператор перехода на следующую итерацию цикла.
+ \item \ns{return\_stmt}  -- оператор возврата из функции.
+ \item \ns{global\_stmt}  -- оператор обьявляения переменной глобальной.
+\\
+ \item \ns{compound\_stmt}  -- составной оператор.
+ \item \ns{funcdef}  -- описание функии.
+ \item \ns{parameters}  -- параметры функции.
+ \item \ns{argslist}  -- список аргументов.
+ \item \ns{if\_stmt}  -- условный оператор.
+ \item \ns{while\_stmt}  -- оператор цикла с предусловие.
+ \item \ns{for\_stmt}  -- оператор цикла с итерированием.
+ \item \ns{suite}  -- блок кода, относяйщися к составным операторам.
+\\ 
+ \item \ns{testlist}  -- перечисление выражений.
+ \item \ns{exprlist}  -- перечисление арифметических выражений.
+ \item \ns{test}  -- единичное выражение .
+ \item \ns{or\_test}  -- выражение с или.
+ \item \ns{and\_test} --  выражение с и.
+ \item \ns{not\_test}  -- выражение с отрицанием.
+ \item \ns{comparison}  -- выражение сравнение.
+ \item \ns{comp\_op}  -- перечисление лексем, участвующих в сравнении.
+ \item \ns{arith\_expr}  -- арифметическое выражение.
+ \item \ns{sign}  -- знак.
+ \item \ns{term}  -- слагаемое.
+ \item \ns{mul\_op}  -- операции с приоритетом у умножения.
+ \item \ns{factor}  -- множитель.
+ \item \ns{power}  -- степень.
+ \item \ns{atom}  -- атом, минимальная частица выражения, состоящая из кортежей, списков, чисел и так далее.
+
+ \item \ns{trailer}  -- постфикс после атома: (), [], . . 
+ \item \ns{subscriptlist}  -- список возможных индексов.
+ \item \ns{subscript}  -- индекс или секция. 
+ \item \ns{sliceop}  -- шаг секции.
+\end{itemize}
+
+Список список терминальных символов -- лексем следующий.
+\begin{itemize}
+\item \ts{SINGLE} -- признак того, что программа запущена в интерактивном режиме.
+\item \ts{FILE} -- признак того, что программа запущена в режиме обработки файла
+\item \ts{NEWLINE} -- новая строка.
+\item \ts{INDENT} -- отступ.
+\item \ts{DEDENT} -- конец отступа.
+\item \ts{NAME} -- название переменной.
+\item \ts{STRING} -- строка в кавычках.
+\item \ts{NUMBER} -- число.
+\item \ts{COM} -- комментарий, начинающийся с \#.
+\item \ts{ENDMARKER} -- признак конца (конец файла).
+\item Таблица TW -- служебных слов языка.
+\item Таблица TD -- таблица смиволов-разделителей.
+\item Таблица TID -- таблица идентификаторов
+\end{itemize}
+
+Собственно сама контекстно свободная грамматика.
+{\scriptsize
+\begin{gather*}
+	\ls{start} \to \ts{SINGLE} \ns{single\_input} | \ts{FILE} \ns{file\_input}\\
+      \ls{single\_input} \to \ts{NEWLINE} | \ns{simple\_stmt} | \ns{compound\_stmt} \ts{NEWLINE} \\
+	\ls{file\_input} \to \{ \ts{NEWLINE} | \ns{stmt} \} \ts{ENDMARKER}\\ 
+	\\
+	\ls{stmt} \to \ns{simple\_stmt} | \ns{compound\_stmt}\\ 
+	\ls{simple\_stmt} \to \ns{small\_stmt} \ts{NEWLINE}\\ 
+	\ls{small\_stmt} \to \ns{expr\_stmt}  | \ns{flow\_stmt} | \ns{global\_stmt}|'pass' \\ 
+	\ls{expr\_stmt} \to \ns{test} \lbrack '=' (\ns{test}) \rbrack \\ 
+	\\
+	\ls{flow\_stmt} \to 'break'| 'continue' | 'return' [\ns{testlist}]\\ 
+	\ls{global\_stmt} \to 'global' \ts{NAME} \{',' \ts{NAME}\}\\ 
+	\ls{compound\_stmt} \to \ns{if\_stmt} | \ns{while\_stmt} | \ns{for\_stmt} | \ns{funcdef}\\ 
+	\ls{funcdef} \to 'def' \ts{NAME} \ns{parameters} ':' \ns{suite}\\ 
+	\ls{parameters} \to '(' [\ns{argslist}] ')'\\ 
+	\ls{argslist} \to \ts{NAME} \{',' \ts{NAME}\}\\ 
+	\ls{if\_stmt} \to 'if' \ns{test} ':' \ns{suite} \lbrack 'else'\ ':' \ns{suite} \rbrack \\ 
+	\ls{while\_stmt} \to 'while' \ns{test} ':' \ns{suite}\\ 
+	\ls{for\_stmt} \to 'for' \ns{exprlist} 'in' \ns{testlist} ':' \ns{suite}\\ 
+	\ls{suite} \to \ns{simple\_stmt} |  \ts{INDENT} \ns{stmt} \{\ns{stmt}\} \ts{DEDENT}\\
+	\\
+	\ls{testlist} \to \ns{test} \{',' \ns{test}\}\\ 
+	\ls{exprlist} \to \ns{arith\_expr} \{',' \ns{arith\_expr}\}\\ 
+	\ls{test} \to \ns{and\_test} \{'or' \ns{and\_test}\}\\ 
+	\ls{and\_test} \to \ns{not\_test} \{'and' \ns{not\_test}\}\\ 
+	\ls{not\_test} \to 'not' \ns{not\_test} | \ns{comparison}\\ 
+	\ls{comparison} \to \ns{arith\_expr} \{\ns{comp\_op} \ns{arith\_expr}\}\\ 
+	\ls{comp\_op} \to '<'|'>'|'=='|'>='|'<='|'!='|'in'|'not'\ 'in'\\ 
+	\ls{arith\_expr} \to \ns{term} \{\ns{sign} \ns{term}\}\\ 
+	\ls{sign} \to '+'|'-'\\ 
+	\ls{term} \to \ns{factor} \{\ns{mul\_op} \ns{factor}\}\\ 
+	\ls{mul\_op} \to '*'|'/'|'\%'|'//'\\ 
+	\ls{factor} \to [\ns{sign}] \ns{factor} | \ns{power}\\ 
+	\ls{power} \to \ns{atom} {\ns{trailer}} ['**' \ns{factor}]\\ 
+	\ls{atom} \to'(' [\ns{testlist}] ')' | '[' [\ns{testlist}] ']' | \ts{NAME} | \ts{NUMBER} | \ts{STRING} | 'None' | 'True' | 'False'\\ 
+	\\
+	\ls{trailer} \to '(' [\ns{testlist}] ')' | '[' \ns{subscriptlist} ']' | '.' \ts{NAME}\\ 
+	\ls{subscriptlist} \to \ns{subscript} {',' \ns{subscript}}\\ 
+	\ls{subscript} \to \ns{test} | [\ns{test}] ':' [\ns{test}] [\ns{sliceop}]\\ 
+	\ls{sliceop} \to ':' [\ns{test}]
+\end{gather*}
+}
+
+\section{Лексический разбор}
+
+Для лексического разбора опишем диаграмму состояний лексического анализатора модельного языка
+А также опишем ранее указанные таблицы TD и TW\\
+\begin{table}[h]
+\caption{Таблица разделителей -- TD} %title of the table
+\centering % centering table
+\begin{tabular}{cccccccc} % creating eight columns
+\hline\hline %inserting double-line
++&  -&   *&       **&      /& //& \% \\
+<& >& <=& >=&  ==& !=& (&\\
+)&       [&       ]&     ,&       :&  .& =&\\[1ex]
+\hline % inserts single-line
+\end{tabular}
+\label{tab:hresult}
+\end{table}
+
+\begin{table}[h]
+\caption{Таблица служебных слов - TW} %title of the table
+\centering % centering table
+\begin{tabular}{cccccccc} % creating eight columns
+\hline\hline %inserting double-line
+False&      return&     None& continue& for&  not&\\
+True&       def& while& and &       global&  in&\\
+if&         or&   else&       pass&       break &    \\ [1ex]
+\hline % inserts single-line
+\end{tabular}
+\label{tab:hresult}
+\end{table}
+
+Таблица TID является таблицей с идентфикаторами, которые встретились в программе, она заполняется во время работы анализатора.
+\\
+\\
+На следующей странице собственно представлена таблица состояний. Обозначание '\_' обозначает пробельный символ, '\_ \_ \_ \_' означает 4 пробела. Переход осуществляется по соответствующим символам дугам. Если по текущему символу нельзя перейти ни по одной дуге, то выводится ошибка. Переменная ind изначально инициализирована 0\\
+\\
+Состояние \ts{SINGLE} или \ts{FILE} не указаны в автомате, одно из них выдается в начале лексического разбора по признаку того, как запщуена программа
+
+\begin{figure} 
+  \includegraphics[width=\textwidth, height = 25 cm]{Lex.png}
+\end{figure}
+
+\end{document}
+

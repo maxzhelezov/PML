@@ -1,0 +1,10 @@
+ty=123
+ty**123
+if ty :
+    for i in 100:
+        ty=ty-1
+else:
+    for i in 100:
+        for j in 200:
+            ty=ty+1
+ty 
