@@ -478,9 +478,20 @@ Lex Scanner::get_lex () {
                     number++;
                     return Lex(lines,number,LEX_END);
                 }
-                curstate=IND;
-                break;
-            }
+                else if (number > 0)// нужно вернуть /n //
+                {//
+                    newline_flag=true;//
+                    char_in_str=0;//
+                    number=0;//
+                    lines++;//
+                    cerr<<TT[LEX_NEWLINE]<<"\t";//
+                    return Lex(lines, number, LEX_NEWLINE);//
+                }//
+                  // Иначе просто "Проглотить" строку
+                curstate=IND;//
+                break;//
+                // return происходит в лиюом случае
+            }//
             case COMP:
             {
                 if(c== '=' )
@@ -587,11 +598,33 @@ Lex Scanner::get_lex () {
                         char_in_str++;
                         if(c!=' ')
                         {
-                            throw Scanner::my_exception(lines,char_in_str,
+                            if (c=='#')//
+                            {//
+                                while(c!='\n'&&c!=EOF)//
+                                    getc();//
+                                if(c==EOF)//
+                                {//
+                                    number++;//
+                                    return Lex(lines,number,LEX_END);//
+                                }//
+                                curlvl=0;//
+                                char_in_str=0;//
+                                number=0;//
+                                lines++;//
+                                c='#';  // 
+                                break;  // 
+                            }    ///
+                            else //
+                                throw Scanner::my_exception(lines,char_in_str,
                                 "Wrong INDENT size",
                                 Scanner::my_exception::lex);
                         }
                     }
+                    if(c=='#')   //
+                    {            //
+                        getc();  //
+                        break;   //
+                    }            //
                     getc();
                     char_in_str++;
                 }
