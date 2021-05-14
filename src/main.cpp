@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "synt.h"
+#include "exec.h"
 #define MAX_NAME_LENGTH 1024
 
 
@@ -24,7 +25,14 @@ int main (int argc,char * argv[])
         }
         else if (argc==3)
         {
-            Parser (initializer,argv[2]);
+            Parser test(initializer,argv[2]);
+            std::vector<Lex>::iterator pa = test.poliz.begin();
+            cout << "!!!!!!!";
+            while(pa != test.poliz.end())
+                std::cout <<  *pa++ << " ";
+            cout << endl;
+            Executer t;
+            t.execute(test.poliz);
         }
     }
     catch (Scanner::my_exception &e)

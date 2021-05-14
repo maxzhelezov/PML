@@ -17,6 +17,7 @@ public:
     Lex curlex;               // Текущая лексема
     type_of_lex curtype;      // Тип текущей лексемы
     void gl();                // Метод считывания лексемы и её типа
+    std::vector <Lex> poliz;  // Вектор лексем 
     Parser(std::string initializer, const char * filename=NULL);
     // Вместо start используется конструктор
     // void start (); 
@@ -38,7 +39,7 @@ public:
     void while_stmt(); 
     void for_stmt(); 
     void suite (); 
-    void testlist (); 
+    int testlist (); 
     void exprlist (); 
     void test (); 
     void and_test(); 

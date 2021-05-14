@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdio>
+#include <string>
 
 
 enum type_of_lex {
@@ -30,11 +31,16 @@ enum type_of_lex {
 
 //  Атомы
     LEX_NAME, LEX_NUM, LEX_STRING, LEX_INDENT, LEX_DEDENT, LEX_NEWLINE, LEX_END,       
-//  Необходимая для полиза часть.                                                                                 
-    POLIZ_LABEL,                                                                                
-    POLIZ_ADDRESS,                                                                              
-    POLIZ_GO,                                                                                   
-    POLIZ_FGO                                                                                   
+//  Необходимая для полиза часть.
+    POLIZ_LABEL, 
+    POLIZ_ADDRESS,
+    POLIZ_GO,
+    POLIZ_FGO,
+    POLIZ_LOAD_LOC,
+    POLIZ_STORE_LOC,
+    POLIZ_LOAD_GLOBAL,
+    POLIZ_STORE_GLOBAL,
+    POLIZ_CALL, // Значение - число аргументов
 };
 
 //  Класс  Ident - нужен для создания таблицы идентификаторов 
@@ -75,10 +81,12 @@ class Lex
     
 public:
     Lex (int line=0,int number=0 ,type_of_lex type = LEX_NULL, int value = 0 );
+    Lex(const Lex &);
     type_of_lex  get_type () const ;
     int get_value () const ;
     int get_line() const;
     int get_number() const;
+    std::string get_ident(); // Получить идентификатор по номеру 
     friend std::ostream & operator<< ( std::ostream &s, Lex l );
 };
 
@@ -114,7 +122,7 @@ public :
     // Таблицы с строковым описанием 
     static const char * TD [23];  //
     static const char * TW [18];  // 
-    static const char * TT [POLIZ_FGO+1]; //
+    static const char * TT []; //
     Scanner( const char *prog);
     // Метод, возвращающий лексему либо выдающий ошибку, если
     // нарушено правило автомата.
