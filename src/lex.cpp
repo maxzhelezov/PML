@@ -10,6 +10,8 @@
 #include <algorithm>
 using namespace std;
 
+#define DBG 0
+
 // Блок методов класса Ident 
 
 Ident::Ident() { 
@@ -79,6 +81,10 @@ int put ( const string & buf ) {
     return TID.size () - 1;
 }
 
+std::string Lex::get_ident(){
+    return TID[this -> get_value()].get_name();
+}
+
 // Таблица строк
 vector<string> Strtbl;
 
@@ -102,6 +108,13 @@ Lex::Lex ( int lines, int number ,type_of_lex type , int value ) :
 
 }
 
+Lex::Lex(const Lex & in):
+            lex_line(in.get_line()),lex_number(in.get_number()),
+            lex_type (in.get_type()), lex_value (in.get_value())  
+{
+
+}
+
 // Getter'ы класса Ident
 type_of_lex  Lex::get_type () const { 
     return lex_type; 
@@ -122,8 +135,9 @@ int Lex::get_number() const{
 // Вывод лексемы, нужен для вывода ошибок на более поздних этапах
 ostream & operator<< ( ostream &s, Lex l )
 {
-    cout<<"Type equals "<<Scanner::TT[l.get_type()];
-    cout<<" , value equals "<<l.get_value();
+    cout << "(" <<  Scanner::TT[l.get_type()] << "," << l.get_value() << ")";
+    //cout<<"Type equals "<<Scanner::TT[l.get_type()];
+    //cout<<" , value equals "<<l.get_value();
     return s;
 }
 
@@ -162,7 +176,13 @@ ostream & operator<< ( ostream &s, Scanner::my_exception e )
             s<<"Message: "<<e.error_message<<endl;
             break;
         }
-    }
+        case Scanner::my_exception::exec:
+        {
+            s<<"Runtime mistake" << endl;
+            s<<"Type error: "<<e.error_message<<endl;
+            break;
+        }
+ }
     return s;
 }
 
@@ -179,7 +199,7 @@ const char * Scanner::TW [18]={
 
 };
 //  Соответствующие лексемам слова, нужны для удобного вывода
-const char * Scanner::TT [POLIZ_FGO +1]={ 
+const char * Scanner::TT []={ 
     "LEX_NULL", "LEX_TW ", "LEX_NONE ", "LEX_TRUE ", "LEX_FALSE ", 
     "LEX_GLOBAL ", "LEX_DEF ", "LEX_RET ", "LEX_WHILE ", "LEX_FOR ",
     "LEX_CONT ", "LEX_PASS ", "LEX_BREAK ", "LEX_IF ", "LEX_ELSE ",
@@ -191,7 +211,9 @@ const char * Scanner::TT [POLIZ_FGO +1]={
     "LEX_SEMICOLON ", "LEX_COMMA ", "LEX_COLON ", "LEX_DOT ",
     "LEX_NAME ", "LEX_NUM ", "LEX_STRING ", "LEX_INDENT ", "LEX_DEDENT ", 
     "LEX_NEWLINE ", "LEX_END ",
-    "POLIZ_LABEL ", "POLIZ_ADDRESS ", "POLIZ_GO " , "POLIZ_FGO "                                                                                 
+    "POLIZ_LABEL ", "POLIZ_ADDRESS ", "POLIZ_GO " , "POLIZ_FGO ",
+    "POLIZ_LOAD_LOC", "POLIZ_STORE_LOC" , "POLIZ_LOAD_GLOBAL" , "POLIZ_STORE_GLOBAL",
+    "POLIZ_CALL",
 };
 
 // Конструктор  класса Scanner - открывает файл на чтение и выставляет флаги
@@ -287,7 +309,7 @@ bool isdigit(char c)
 // Метод, возвращающий лексему в соответствии с имеющимся автоматом.
 
 Lex Scanner::get_lex () {
-    int  d,i, j,strlength;
+    int  d = 0,i, j,strlength;
     static int dedent_left=0;    // Кол-во набраных Dedent
 /*
     Поясним необходимость данной переменной на следующем примере

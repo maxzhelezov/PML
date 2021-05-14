@@ -136,15 +136,19 @@ void Parser::small_stmt ()
 
 void Parser::expr_stmt ()
 {
+    Lex lex;
+    lex = curlex;
+    int pos = poliz.size();
     test();
     if( curtype==LEX_ASSIGN)
     {
         gl();
         test();
+        poliz.push_back(Lex(0,0,POLIZ_STORE_LOC, lex.get_value()));
+        poliz.erase(poliz.begin() + pos);
     }
+
 } 
-
-
 void Parser::flow_stmt ()
 {
     switch (curtype)
@@ -302,6 +306,7 @@ void Parser::argslist ()
 
 void Parser::if_stmt ()
 {
+    int pos1, pos2, pos3 = -1;
     if(curtype!=LEX_IF)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "if_stmt: no if",
@@ -309,6 +314,8 @@ void Parser::if_stmt ()
         //throw "if_stmt: no if";
     gl();
     test();
+    pos1 = poliz.size();
+    poliz.push_back(Lex(0,0,POLIZ_FGO, 0));
     if(curtype!=LEX_COLON)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "if_stmt: no colon after if <test>",
@@ -316,7 +323,9 @@ void Parser::if_stmt ()
         //throw "if_stmt: no colon after if test";
     gl();
     suite();
-    
+    pos2 = poliz.size();
+    poliz.push_back(Lex(0,0,POLIZ_GO, 0));
+
     if( curtype==LEX_ELSE)
     {
         gl();
@@ -327,20 +336,35 @@ void Parser::if_stmt ()
             //throw "if_stmt: no colon after else";
         gl();
         suite();
+        pos3 = poliz.size();
+        poliz.push_back(Lex(0,0,POLIZ_ADDRESS, 0));
     }
-    
+
+
+    if (pos3 != -1){
+        poliz[pos1] = Lex(0,0,POLIZ_FGO, pos2 + 1);
+        poliz[pos2] = Lex(0,0,POLIZ_GO, pos3);
+    }
+    else{
+        poliz[pos1] = Lex(0,0,POLIZ_FGO, pos2);
+        poliz.erase(poliz.begin() + pos2);
+    }
 } 
 
 
 void Parser::while_stmt()
 {
+    int pos1, pos2, pos3;
     if(curtype!=LEX_WHILE)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "while_stmt: no while_stmt",
                     Scanner::my_exception::synt);
         //throw "while_stmt: no while_stmt";
-    gl();   
+    gl();
+    pos1 = poliz.size(); 
     test();
+    pos2 = poliz.size();
+    poliz.push_back(Lex(0,0,POLIZ_FGO, 0));
     if(curtype!=LEX_COLON)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "while_stmt: no colon after <test>",
@@ -348,6 +372,10 @@ void Parser::while_stmt()
         //throw "while_stmt: no colon after <test>";
     gl();
     suite();
+    poliz.push_back(Lex(0,0,POLIZ_GO, pos1));
+    poliz.push_back(Lex(0,0,POLIZ_ADDRESS, 0));
+    pos3 = poliz.size();
+    poliz[pos2] = Lex(0,0,POLIZ_FGO, pos3);
 } 
 void Parser::for_stmt()
 {
@@ -398,14 +426,17 @@ void Parser::suite ()
     }
 } 
 
-void Parser::testlist ()
+int Parser::testlist ()
 {
+    int size = 1;
     test();
     while (curtype==LEX_COMMA)
     {
+        size++;
         gl();
         test();
     }
+    return size;
 } 
 
 void Parser::exprlist ()
@@ -420,30 +451,39 @@ void Parser::exprlist ()
 
 void Parser::test ()
 {
+    Lex lex;
     and_test();
     while (curtype==LEX_OR)
     {
+        lex = curlex;
         gl();
         and_test();
+        poliz.push_back(lex);
     }
 } 
 
 void Parser::and_test()
 {
+    Lex lex;
     not_test();
     while (curtype==LEX_AND)
     {
+        lex = curlex;
         gl();
         not_test();
+        poliz.push_back(lex);
     }
 } 
 
 void Parser::not_test ()
 {
+    Lex lex;
     if( curtype==LEX_NOT)
     {
+        lex = curlex;
         gl();
         not_test();
+        poliz.push_back(lex);
     }
     else
         comparison();
@@ -453,15 +493,18 @@ void Parser::comparison ()
 {
     bool comparison_found;
     arith_expr();
+    Lex lex;
     //Равносильно равенству одному из
 // '>' | '<' | '==' | '>='| '<=' | '!=' | 'in' | 'not' | 'in'
     comparison_found=((int)curtype>=(int)LEX_LSS&&(int)curtype<=(int)LEX_NEQ)||
         ((int)curtype>=(int)LEX_NOT&&(int)curtype<=(int)LEX_OR);
     while(comparison_found)
     {
+        lex = curlex;
         // Считали символ - сравнение
         gl();
         arith_expr();
+        poliz.push_back(lex);
         // Снова проверка -тот ли символ
         comparison_found=((int)curtype>=LEX_LSS&&(int)curtype<=LEX_NEQ)||
             ((int)curtype>=LEX_NOT&&(int)curtype<=LEX_OR);
@@ -473,12 +516,15 @@ void Parser::arith_expr ()
 {
     bool sign_found;
     term();
+    Lex lex;
     sign_found=curtype==LEX_PLUS || curtype==LEX_MINUS;
     while(sign_found)
     {
+        lex = curlex;
         // Считали символ - знак
         gl();
         term();
+        poliz.push_back(lex);
         // Снова проверка - тот ли символ
         sign_found=curtype==LEX_PLUS || curtype==LEX_MINUS;
     }
@@ -488,13 +534,16 @@ void Parser::term ()
 {
     bool mul_found;
     factor();
+    Lex lex;
     mul_found=curtype==LEX_TIMES || curtype==LEX_DSLASH|| 
         curtype==LEX_SLASH|| curtype==LEX_PERC;
     while(mul_found)
     {
+        lex = curlex;
         // Считали символ - знак
         gl();
         factor();
+        poliz.push_back(lex);
         // Снова проверка - тот ли символ
         mul_found=curtype==LEX_TIMES || curtype==LEX_DSLASH|| 
         curtype==LEX_SLASH|| curtype==LEX_PERC;
@@ -503,11 +552,14 @@ void Parser::term ()
 
 void Parser::factor ()
 {
-    if(curtype==LEX_PLUS || curtype==LEX_MINUS)
+    Lex lex;
+    if(curtype == LEX_PLUS || curtype == LEX_MINUS)
     {
         //знак есть
+        lex = curlex;
         gl();
         factor();
+        poliz.push_back(lex);
     }
     else
     {
@@ -518,6 +570,7 @@ void Parser::factor ()
 void Parser::power ()
 {
     bool trailer_flag;
+    Lex lex;
     atom();
     // trailer начинается с '.' | '(' | '['
     trailer_flag= curtype==LEX_DOT || curtype==LEX_RLBRACKET|| 
@@ -530,8 +583,10 @@ void Parser::power ()
     }
     if(curtype==LEX_POW)
     {
+        lex = curlex;
         gl();
         factor();
+        poliz.push_back(lex);
     }
 } 
 
@@ -557,13 +612,15 @@ bool is_a_test(type_of_lex curtype)
 
 void Parser::atom ()
 {
+    int size;
     switch (curtype)
     {
-        case LEX_TRUE:  gl(); return;
-        case LEX_NONE:  gl(); return;
-        case LEX_FALSE: gl(); return;
-        case LEX_NAME:  gl(); return;
-        case LEX_NUM:   gl(); return;
+        case LEX_TRUE:  poliz.push_back(curlex); gl(); return;
+        case LEX_NONE:  poliz.push_back(curlex); gl(); return;
+        case LEX_FALSE: poliz.push_back(curlex); gl(); return;
+        case LEX_NAME: poliz.push_back(Lex(0,0,POLIZ_LOAD_LOC, curlex.get_value()));
+                               gl(); return;
+        case LEX_NUM: poliz.push_back(curlex);  gl(); return;
         case LEX_STRING:gl(); return;
     case LEX_RLBRACKET:
     {
@@ -582,7 +639,7 @@ void Parser::atom ()
     {
         gl();
         if(is_a_test( curtype))
-            testlist(); //Реализован [test]
+            size = testlist(); //Реализован [test]
         if(curtype!=LEX_SRBRACKET)
             throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "atom : no closing square bracket",
@@ -601,6 +658,7 @@ void Parser::atom ()
 
 void Parser::trailer()
 {
+    int size;
 switch (curtype)
     {
     case LEX_DOT: 
@@ -616,12 +674,13 @@ switch (curtype)
         gl();
         // реализует ([testlist])
         if(is_a_test( curtype))
-            testlist();
+            size = testlist();
         if(curtype!=LEX_RRBRACKET)
             throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "trailet : no closing round bracket ",
                     Scanner::my_exception::synt);    
             //throw "atom : no closing round bracket";
+        poliz.push_back(Lex(0, 0,POLIZ_CALL, size));
         gl();
         return;
     }   

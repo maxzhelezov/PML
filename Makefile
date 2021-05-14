@@ -1,11 +1,11 @@
 CXX= g++
-CPPFLAGS= -std=c++03 -Wall -Wextra -O0 -g
+CPPFLAGS= -std=c++03 -Wall -Wextra -frtti -O0 -g
 
 SOURCEDIR = ./src
 BUILDDIR = ./build
 
 BINARIES= yamp.out
-SOURCESPURE= main.cpp lex.cpp synt.cpp
+SOURCESPURE= main.cpp lex.cpp synt.cpp exec.cpp builtins.cpp
 
 SOURCES = $(patsubst %, $(SOURCEDIR)/%, $(SOURCESPURE))
 OBJS=$(patsubst %.cpp, $(BUILDDIR)/%.o, $(SOURCESPURE))
