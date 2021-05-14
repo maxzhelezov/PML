@@ -139,6 +139,11 @@ std::string num::repr(){
     return std::string("int");
 }
 
+bool num::truth(){
+    return bool(data);
+}
+
+
 
 num::~num(){
 };
@@ -157,6 +162,10 @@ PyObj * string::str(){
 
 std::string string::repr(){
     return std::string("string");
+}
+
+bool string::truth(){
+    return data == std::string("");
 }
 
 
@@ -319,6 +328,9 @@ std::string boolean::repr(){
     return std::string("boolean");
 }
 
+bool boolean::truth(){
+    return data;
+}
 
 boolean::~boolean(){
 };

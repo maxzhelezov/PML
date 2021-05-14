@@ -306,6 +306,7 @@ void Parser::argslist ()
 
 void Parser::if_stmt ()
 {
+    int pos1, pos2, pos3 = -1;
     if(curtype!=LEX_IF)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "if_stmt: no if",
@@ -313,6 +314,8 @@ void Parser::if_stmt ()
         //throw "if_stmt: no if";
     gl();
     test();
+    pos1 = poliz.size();
+    poliz.push_back(Lex(0,0,POLIZ_FGO, 0));
     if(curtype!=LEX_COLON)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "if_stmt: no colon after if <test>",
@@ -320,7 +323,9 @@ void Parser::if_stmt ()
         //throw "if_stmt: no colon after if test";
     gl();
     suite();
-    
+    pos2 = poliz.size();
+    poliz.push_back(Lex(0,0,POLIZ_GO, 0));
+
     if( curtype==LEX_ELSE)
     {
         gl();
@@ -331,20 +336,35 @@ void Parser::if_stmt ()
             //throw "if_stmt: no colon after else";
         gl();
         suite();
+        pos3 = poliz.size();
+        poliz.push_back(Lex(0,0,POLIZ_ADDRESS, 0));
     }
-    
+
+
+    if (pos3 != -1){
+        poliz[pos1] = Lex(0,0,POLIZ_FGO, pos2 + 1);
+        poliz[pos2] = Lex(0,0,POLIZ_GO, pos3);
+    }
+    else{
+        poliz[pos1] = Lex(0,0,POLIZ_FGO, pos2);
+        poliz.erase(poliz.begin() + pos2);
+    }
 } 
 
 
 void Parser::while_stmt()
 {
+    int pos1, pos2, pos3;
     if(curtype!=LEX_WHILE)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "while_stmt: no while_stmt",
                     Scanner::my_exception::synt);
         //throw "while_stmt: no while_stmt";
-    gl();   
+    gl();
+    pos1 = poliz.size(); 
     test();
+    pos2 = poliz.size();
+    poliz.push_back(Lex(0,0,POLIZ_FGO, 0));
     if(curtype!=LEX_COLON)
         throw Scanner::my_exception(curlex.get_line(),curlex.get_number(),
                     "while_stmt: no colon after <test>",
@@ -352,6 +372,10 @@ void Parser::while_stmt()
         //throw "while_stmt: no colon after <test>";
     gl();
     suite();
+    poliz.push_back(Lex(0,0,POLIZ_GO, pos1));
+    poliz.push_back(Lex(0,0,POLIZ_ADDRESS, 0));
+    pos3 = poliz.size();
+    poliz[pos2] = Lex(0,0,POLIZ_FGO, pos3);
 } 
 void Parser::for_stmt()
 {

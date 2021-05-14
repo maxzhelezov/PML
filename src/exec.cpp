@@ -174,7 +174,7 @@ void Executer::execute(std::vector<Lex> poliz){
             case LEX_POW:
                 a = st.top(); st.pop();
                 b = st.top(); st.pop();
-                c = *b % a;
+                c = b -> power(a);
                 if (c == 0)
                     err2(a,b,"binary power");
                 st.push(c);
@@ -183,6 +183,21 @@ void Executer::execute(std::vector<Lex> poliz){
             case POLIZ_STORE_LOC: 
                 a = st.top(); st.pop();
                 dict[curlex.get_ident()] = a; 
+                break;
+        
+            case POLIZ_GO:
+                i = curlex.get_value();
+                continue; //пропускаем i++
+                break;
+
+            case POLIZ_FGO:
+                a = st.top(); st.pop();
+                if (a -> truth())
+                    ;
+                else{
+                    i = curlex.get_value();
+                    continue; //пропускаем i++
+                }
                 break;
 
             case POLIZ_LOAD_LOC: 

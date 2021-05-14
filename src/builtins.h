@@ -21,7 +21,6 @@ public:
     virtual PyObj * operator<=(PyObj *) = 0; 
     virtual PyObj * operator<(PyObj *) = 0; 
     virtual PyObj * operator!=(PyObj *) = 0;
-    
 
     // math
     virtual PyObj * operator+(PyObj *) = 0; 
@@ -33,7 +32,8 @@ public:
     
     virtual PyObj * str() = 0;
     virtual std::string repr() = 0;
-
+    virtual bool truth() = 0;
+    
     virtual ~PyObj(){};
 };
 
@@ -63,6 +63,7 @@ public:
     
     virtual PyObj * str();
     virtual std::string repr();
+    virtual bool truth();
 
     virtual ~num();
 };
@@ -93,6 +94,7 @@ public:
     void run(std::vector<PyObj *>); //вызвать функцию
     virtual PyObj * str();
     virtual std::string repr();
+    virtual bool truth(){return 0;}
 
     virtual ~fun();
 };
@@ -123,6 +125,7 @@ public:
     
     virtual PyObj * str();
     virtual std::string repr();
+    virtual bool truth();
     
     virtual ~string();
 };
@@ -153,6 +156,7 @@ public:
     
     virtual PyObj * str();
     virtual std::string repr();
+    virtual bool truth();
 
     virtual ~boolean();
 };
