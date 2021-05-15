@@ -521,6 +521,8 @@ Lex Scanner::get_lex () {
                     return Lex(lines,first_char, LEX_NEWLINE);//
                 }//
                   // Иначе просто "Проглотить" строку
+                lines++;//
+                char_in_str=0;//
                 curstate=IND;//
                 break;//
                 // return происходит в лиюом случае
@@ -622,45 +624,37 @@ Lex Scanner::get_lex () {
             case IND:
             {
                 int curlvl=0;
-                while(c==' ')
+                if(c=='#')
                 {
-                    curlvl++;
-                    for(i=0;i<3;i++)
+                    curstate=COMM;
+                    break;
+                }
+                try {
+                    while(c==' ')
                     {
-                        getc();
-                        char_in_str++;
-                        if(c!=' ')
+                        curlvl++;
+                        for(i=0;i<3;i++)
                         {
-                            if (c=='#')//
-                            {//
-                                while(c!='\n'&&c!=EOF)//
-                                    getc();//
-                                if(c==EOF)//
-                                {//
-                                    number++;//
-                                    return Lex(lines,first_char,LEX_END);//
-                                }//
-                                curlvl=0;//
-                                char_in_str=0;//
-                                first_char=1;
-                                number=0;//
-                                lines++;//
-                                c='#';  // 
-                                break;  // 
-                            }    ///
-                            else //
-                                throw Scanner::my_exception(lines,char_in_str,
+                            getc();
+                            char_in_str++;
+                            if(c!=' ')
+                                if (c=='#')//
+                                    throw '#';
+                                else
+                                    throw Scanner::my_exception(lines,char_in_str,
                                 "Wrong INDENT size",
                                 Scanner::my_exception::lex);
                         }
+                        getc();
+                        char_in_str++;
                     }
-                    if(c=='#')   //
-                    {            //
-                        getc();  //
-                        break;   //
-                    }            //
-                    getc();
-                    char_in_str++;
+                    if (c=='#')//
+                        throw '#';
+                }
+                catch(char)
+                {
+                    curstate=COMM;
+                    break;
                 }
                 // ~ungetc
                 char_left++; 

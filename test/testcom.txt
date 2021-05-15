@@ -1,8 +1,14 @@
 1+1 # Works fine
-for j in 20: #Still works fine
+while j< 20: #Still works fine
 #No problem here
     i=c+1
- #And here
+  #And here
+#And here
     j=j+i
+    while j<10:
+    #And here
+        j=j+1
+    #And here
+  #And here
 print(i)
  #No problems yet
