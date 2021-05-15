@@ -97,6 +97,11 @@ int put_str ( const string & buf ) {
     return Strtbl.size () - 1;
 }
 
+std::string Lex::get_string(){
+    return Strtbl[this -> get_value()];
+}
+
+
 
 
 
@@ -178,8 +183,8 @@ ostream & operator<< ( ostream &s, Scanner::my_exception e )
         }
         case Scanner::my_exception::exec:
         {
-            s<<"Runtime mistake" << endl;
-            s<<"Type error: "<<e.error_message<<endl;
+            s<<"Runtime error" << endl;
+            s<<e.error_message<<endl;
             break;
         }
  }

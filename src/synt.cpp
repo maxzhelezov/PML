@@ -621,7 +621,7 @@ void Parser::atom ()
         case LEX_NAME: poliz.push_back(Lex(0,0,POLIZ_LOAD_LOC, curlex.get_value()));
                                gl(); return;
         case LEX_NUM: poliz.push_back(curlex);  gl(); return;
-        case LEX_STRING:gl(); return;
+        case LEX_STRING: poliz.push_back(curlex); gl(); return;
     case LEX_RLBRACKET:
     {
         gl();
@@ -658,7 +658,7 @@ void Parser::atom ()
 
 void Parser::trailer()
 {
-    int size;
+    int size = 0;
 switch (curtype)
     {
     case LEX_DOT: 

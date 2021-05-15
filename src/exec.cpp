@@ -42,6 +42,10 @@ void Executer::execute(std::vector<Lex> poliz){
                 st.push(new boolean(true));
                 break;
 
+            case LEX_STRING:
+                st.push(new string(curlex.get_string()));
+                break;
+
             case LEX_FALSE:
                 st.push(new boolean(false));
                 break;
@@ -213,7 +217,9 @@ void Executer::execute(std::vector<Lex> poliz){
                 }
                 tempfun = dynamic_cast<fun *>(st.top());
                 st.pop();
-                tempfun -> run(args);
+                c = tempfun -> run(args);
+                if (c != 0)
+                    st.push(c);
 
             default:;
         }

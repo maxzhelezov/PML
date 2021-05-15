@@ -86,6 +86,7 @@ public:
     int get_value () const ;
     int get_line() const;
     int get_number() const;
+    std::string get_string(); // Получить идентификатор по номеру 
     std::string get_ident(); // Получить идентификатор по номеру 
     friend std::ostream & operator<< ( std::ostream &s, Lex l );
 };

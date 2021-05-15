@@ -31,6 +31,7 @@ public:
     virtual PyObj * operator*(PyObj *) = 0; 
     
     virtual PyObj * str() = 0;
+    virtual int to_int() = 0;
     virtual std::string repr() = 0;
     virtual bool truth() = 0;
     
@@ -62,6 +63,7 @@ public:
     virtual PyObj * operator%(PyObj *);
     
     virtual PyObj * str();
+    virtual int to_int();
     virtual std::string repr();
     virtual bool truth();
 
@@ -69,9 +71,9 @@ public:
 };
 
 class fun: public PyObj{
-    void (*f)(std::vector<PyObj *>);
+    PyObj * (*f)(std::vector<PyObj *>);
 public:
-    fun(void (*f)(std::vector<PyObj *>));
+    fun(PyObj * (*f)(std::vector<PyObj *>));
     //logic
     virtual PyObj * operator&&(PyObj *){return 0;} 
     virtual PyObj * operator||(PyObj *){return 0;} 
@@ -91,8 +93,9 @@ public:
     virtual PyObj * operator*(PyObj *){return 0;}
     virtual PyObj * operator-(PyObj *){return 0;} 
     
-    void run(std::vector<PyObj *>); //вызвать функцию
+    PyObj * run(std::vector<PyObj *>); //вызвать функцию
     virtual PyObj * str();
+    virtual int to_int() {return 0;}
     virtual std::string repr();
     virtual bool truth(){return 0;}
 
@@ -124,6 +127,7 @@ public:
     virtual PyObj * operator%(PyObj *){return 0;}
     
     virtual PyObj * str();
+    virtual int to_int();
     virtual std::string repr();
     virtual bool truth();
     
@@ -155,6 +159,7 @@ public:
     virtual PyObj * operator%(PyObj *);
     
     virtual PyObj * str();
+    virtual int to_int();
     virtual std::string repr();
     virtual bool truth();
 
@@ -166,6 +171,7 @@ public:
 
 void builtins(std::map<std::string, PyObj*> &);
 
-void print(std::vector<PyObj *>);
-
+PyObj * print(std::vector<PyObj *>);
+PyObj * input(std::vector<PyObj *>);
+PyObj * to_int(std::vector<PyObj *>);
 #endif
