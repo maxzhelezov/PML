@@ -410,7 +410,7 @@ PyObj * input(std::vector<PyObj *> args){
 
 PyObj * to_int(std::vector<PyObj *> args){
     if (args.size() != 1)
-        throw Scanner::my_exception(0,0,"Type Error: input() takes 1 arguments\
+        throw Scanner::my_exception(0,0,"Type Error: int() takes 1 arguments\
  (given " + itoa(args.size()) + ")" ,
                 Scanner::my_exception::exec);
     PyObj * in = args[0];
