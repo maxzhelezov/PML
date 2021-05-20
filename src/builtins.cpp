@@ -143,6 +143,16 @@ PyObj * num::operator-(PyObj * in){
     return 0;
 }
 
+PyObj * num::operator-(){
+        return new num(-this->data);
+    return 0;
+}
+
+PyObj * num::operator+(){
+        return new num(+this->data);
+    return 0;
+}
+
 PyObj * num::true_div(PyObj * in){
     if (typeid(*in) == typeid(num)){
         num * temp = dynamic_cast<num * >(in);
@@ -262,6 +272,16 @@ PyObj * tfloat::operator+(PyObj * in){
         return new tfloat(this->data + t_num -> get());
     if (t_float)
         return new tfloat(this->data + t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator-(){
+        return new tfloat(-this->data);
+    return 0;
+}
+
+PyObj * tfloat::operator+(){
+        return new tfloat(+this->data);
     return 0;
 }
 
@@ -484,6 +504,16 @@ PyObj * boolean::operator+(PyObj * in){
         boolean * temp = dynamic_cast<boolean * >(in);
         return new num(this->data + temp -> get());
     }
+    return 0;
+}
+
+PyObj * boolean::operator-(){
+        return new num(-this->data);
+    return 0;
+}
+
+PyObj * boolean::operator+(){
+        return new num(+this->data);
     return 0;
 }
 

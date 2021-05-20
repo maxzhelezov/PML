@@ -131,21 +131,39 @@ void Executer::execute(std::vector<Lex> poliz){
                 break;
 
             case LEX_MINUS:
-               a = st.top(); st.pop();
-                b = st.top(); st.pop();
-                c = *b - a;
-                if (c == 0)
-                    err2(a,b,"binary minus");
-                st.push(c);
+                if (curlex.get_value() == 2){
+                    a = st.top(); st.pop();
+                    b = st.top(); st.pop();
+                    c = *b - a;
+                    if (c == 0)
+                        err2(a,b,"binary minus");
+                    st.push(c);
+                }
+                if (curlex.get_value() == 1){
+                    a = st.top(); st.pop();
+                    c = -(*a);
+                    if (c == 0)
+                        err(a, "unary minus");
+                    st.push(c);
+                }
                 break;
 
             case LEX_PLUS:
-                a = st.top(); st.pop();
-                b = st.top(); st.pop();
-                c = *b + a;
-                if (c == 0)
-                    err2(a,b,"binary plus");
-                st.push(c);
+                if (curlex.get_value() == 2){
+                    a = st.top(); st.pop();
+                    b = st.top(); st.pop();
+                    c = *b + a;
+                    if (c == 0)
+                        err2(a,b,"binary plus");
+                    st.push(c);
+                }
+                if (curlex.get_value() == 1){
+                    a = st.top(); st.pop();
+                    c = +(*a);
+                    if (c == 0)
+                        err(a,"unary plus");
+                    st.push(c);
+                }
                 break;
         
             case LEX_SLASH:
@@ -156,7 +174,6 @@ void Executer::execute(std::vector<Lex> poliz){
                     err2(a,b,"binary division");
                 st.push(c);
                 break;
-
 
             case LEX_DSLASH:
                 a = st.top(); st.pop();

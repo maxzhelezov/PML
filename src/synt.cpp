@@ -524,7 +524,7 @@ void Parser::arith_expr ()
         // Считали символ - знак
         gl();
         term();
-        poliz.push_back(lex);
+        poliz.push_back(Lex(0, 0, lex.get_type(), 2));
         // Снова проверка - тот ли символ
         sign_found=curtype==LEX_PLUS || curtype==LEX_MINUS;
     }
@@ -559,7 +559,7 @@ void Parser::factor ()
         lex = curlex;
         gl();
         factor();
-        poliz.push_back(lex);
+        poliz.push_back(Lex(0,0,lex.get_type(), 1));
     }
     else
     {

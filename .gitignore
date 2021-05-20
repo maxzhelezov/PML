@@ -18,6 +18,7 @@
 a.out
 .DS_Store
 thumbs.db
+.gdb_history
 
 *.exe
 *.obj

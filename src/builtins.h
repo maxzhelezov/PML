@@ -24,8 +24,10 @@ public:
 
     // math
     virtual PyObj * operator+(PyObj *) = 0; 
+    virtual PyObj * operator+() = 0; 
     virtual PyObj * power(PyObj *) = 0; 
     virtual PyObj * operator-(PyObj *) = 0; 
+    virtual PyObj * operator-() = 0; 
     virtual PyObj * true_div(PyObj *) = 0; 
     virtual PyObj * operator/(PyObj *) = 0; 
     virtual PyObj * operator%(PyObj *) = 0;
@@ -57,6 +59,8 @@ public:
     
     //math
     virtual PyObj * operator+(PyObj *); 
+    virtual PyObj * operator-(); 
+    virtual PyObj * operator+(); 
     virtual PyObj * operator-(PyObj *); 
     virtual PyObj * power(PyObj *); 
     virtual PyObj * operator*(PyObj *); 
@@ -91,6 +95,9 @@ public:
     //math
     virtual PyObj * operator+(PyObj *); 
     virtual PyObj * operator-(PyObj *); 
+    virtual PyObj * operator+(); 
+    virtual PyObj * operator-(); 
+    
     virtual PyObj * power(PyObj *); 
     virtual PyObj * operator*(PyObj *); 
     virtual PyObj * true_div(PyObj *){return 0;}
@@ -122,6 +129,8 @@ public:
     virtual PyObj * operator!=(PyObj *){return 0;}
     
     //math
+    virtual PyObj * operator+(){return 0;} 
+    virtual PyObj * operator-(){return 0;}
     virtual PyObj * operator+(PyObj *){return 0;}
     virtual PyObj * power(PyObj *){return 0;}
     virtual PyObj * true_div(PyObj *){return 0;} 
@@ -157,6 +166,8 @@ public:
     virtual PyObj * operator!=(PyObj *){return 0;}
     
     //math
+    virtual PyObj * operator+(){return 0;} 
+    virtual PyObj * operator-(){return 0;}
     virtual PyObj * operator+(PyObj *); 
     virtual PyObj * power(PyObj *){return 0;} 
     virtual PyObj * operator-(PyObj *) {return 0;} 
@@ -190,6 +201,8 @@ public:
     virtual PyObj * operator!=(PyObj *);
     
     //math
+    virtual PyObj * operator+();
+    virtual PyObj * operator-();
     virtual PyObj * operator+(PyObj *);
     virtual PyObj * operator-(PyObj *); 
     virtual PyObj * power(PyObj *);
