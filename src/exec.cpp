@@ -206,6 +206,12 @@ void Executer::execute(std::vector<Lex> poliz){
 
             case POLIZ_LOAD_LOC: 
                 a = dict[curlex.get_ident()]; 
+                if (a == 0){
+                    throw Scanner::my_exception(0,0,
+                    "Name Error: name " + curlex.get_ident() + " is not defined",
+                    Scanner::my_exception::exec);
+                }
+
                 st.push(a);
                 break;
 
