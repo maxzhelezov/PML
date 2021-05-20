@@ -7,7 +7,14 @@
 #include <cmath>
 #include "lex.h"
 
-#define UN(x) (void)(x) 
+template <typename T>
+T * get_cast(PyObj *in){
+    if (typeid(*in) == typeid(T)){
+        T * temp = dynamic_cast<T *>(in);
+        return temp;
+    }
+    return 0;
+}
 
 static std::string itoa(int in){
     std::stringstream stream;
@@ -19,18 +26,16 @@ num::num(int x): data(x)
 {}
 
 PyObj * num::operator&&(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
+    num * temp = get_cast<num>(in);
+    if (temp)
         return new num(this->data & temp -> get());
-    }
     return 0;
 }
 
 PyObj * num::operator||(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
+    num * temp = get_cast<num>(in);
+    if (temp)
         return new num(this->data | temp -> get());
-    }
     return 0;
 }
 
@@ -38,84 +43,103 @@ PyObj * num::operator!(){
         return new num(!this->data);
 }
 
-
 PyObj * num::operator>(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new boolean(this->data > temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data > t_num -> get());
+    if (t_float)
+        return new boolean(this->data > t_float -> get());
     return 0;
 }
 
 PyObj * num::operator>=(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new boolean(this->data >= temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data >= t_num -> get());
+    if (t_float)
+        return new boolean(this->data >= t_float -> get());
     return 0;
 }
 
 PyObj * num::operator==(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new boolean(this->data == temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data == t_num -> get());
+    if (t_float)
+        return new boolean(this->data == t_float -> get());
     return 0;
 }
 
 PyObj * num::operator<(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new boolean(this->data < temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data < t_num -> get());
+    if (t_float)
+        return new boolean(this->data < t_float -> get());
     return 0;
 }
 
 PyObj * num::operator<=(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new boolean(this->data <= temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data <= t_num -> get());
+    if (t_float)
+        return new boolean(this->data <= t_float -> get());
     return 0;
 }
 
 PyObj * num::operator!=(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new boolean(this->data != temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data != t_num -> get());
+    if (t_float)
+        return new boolean(this->data != t_float -> get());
     return 0;
 }
 
 PyObj * num::operator+(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new num(this->data + temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new num(this->data + t_num -> get());
+    if (t_float)
+        return new tfloat(this->data + t_float -> get());
     return 0;
 }
 
 PyObj * num::operator*(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new num(this->data * temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new num(this->data * t_num -> get());
+    if (t_float)
+        return new tfloat(this->data * t_float -> get());
     return 0;
 }
 
 PyObj * num::power(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new num(pow(this->data,temp -> get()));
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new num(pow(this->data, t_num -> get()));
+    if (t_float)
+        return new tfloat(pow(this->data, t_float -> get()));
     return 0;
 }
 
 PyObj * num::operator-(PyObj * in){
-    if (typeid(*in) == typeid(num)){
-        num * temp = dynamic_cast<num * >(in);
-        return new num(this->data - temp -> get());
-    }
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new num(this->data - t_num -> get());
+    if (t_float)
+        return new tfloat(this->data - t_float -> get());
     return 0;
 }
 
@@ -132,6 +156,16 @@ PyObj * num::operator%(PyObj * in){
         num * temp = dynamic_cast<num * >(in);
         return new num(this->data % temp -> get());
     }
+    return 0;
+}
+
+PyObj * num::operator/(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new tfloat((double)this->data / t_num -> get());
+    if (t_float)
+        return new tfloat(this->data / t_float -> get());
     return 0;
 }
 
@@ -155,10 +189,147 @@ bool num::truth(){
     return bool(data);
 }
 
-
-
 num::~num(){
 };
+
+tfloat::tfloat(double x): data(x)
+{}
+
+PyObj * tfloat::operator>(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data > t_num -> get());
+    if (t_float)
+        return new boolean(this->data > t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator>=(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data >= t_num -> get());
+    if (t_float)
+        return new boolean(this->data >= t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator==(PyObj * in){
+        num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data == t_num -> get());
+    if (t_float)
+        return new boolean(this->data == t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator<(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data < t_num -> get());
+    if (t_float)
+        return new boolean(this->data < t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator<=(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data <= t_num -> get());
+    if (t_float)
+        return new boolean(this->data <= t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator!=(PyObj * in){
+        num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new boolean(this->data != t_num -> get());
+    if (t_float)
+        return new boolean(this->data != t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator+(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new tfloat(this->data + t_num -> get());
+    if (t_float)
+        return new tfloat(this->data + t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator*(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new tfloat(this->data * t_num -> get());
+    if (t_float)
+        return new tfloat(this->data * t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::power(PyObj * in){
+    num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new tfloat(pow(this->data, t_num -> get()));
+    if (t_float)
+        return new tfloat(pow(this->data, t_float -> get()));
+    return 0;
+}
+
+PyObj * tfloat::operator-(PyObj * in){
+num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new tfloat(this->data - t_num -> get());
+    if (t_float)
+        return new tfloat(this->data - t_float -> get());
+    return 0;
+}
+
+PyObj * tfloat::operator/(PyObj * in){
+num * t_num = get_cast<num>(in);
+    tfloat * t_float = get_cast<tfloat>(in);
+    if (t_num)
+        return new tfloat(this->data / t_num -> get());
+    if (t_float)
+        return new tfloat(this->data / t_float -> get());
+    return 0;
+}
+
+
+PyObj * tfloat::str(){
+    std::stringstream stream;
+    stream << data;
+    return new string(stream.str());
+}
+
+int tfloat::to_int(){
+    return data;
+}
+
+
+std::string tfloat::repr(){
+    return std::string("float");
+}
+
+bool tfloat::truth(){
+    return bool(data);
+}
+
+
+
+tfloat::~tfloat(){
+};
+
 
 string::string(std::string in)
 {
@@ -352,6 +523,14 @@ PyObj * boolean::operator%(PyObj * in){
     if (typeid(*in) == typeid(boolean)){
         boolean * temp = dynamic_cast<boolean * >(in);
         return new num(this->data % temp -> get());
+    }
+    return 0;
+}
+
+PyObj * boolean::operator/(PyObj * in){
+    if (typeid(*in) == typeid(boolean)){
+        boolean * temp = dynamic_cast<boolean * >(in);
+        return new num(this->data / temp -> get());
     }
     return 0;
 }

@@ -147,6 +147,16 @@ void Executer::execute(std::vector<Lex> poliz){
                     err2(a,b,"binary plus");
                 st.push(c);
                 break;
+        
+            case LEX_SLASH:
+                a = st.top(); st.pop();
+                b = st.top(); st.pop();
+                c = (*b) / a;
+                if (c == 0)
+                    err2(a,b,"binary division");
+                st.push(c);
+                break;
+
 
             case LEX_DSLASH:
                 a = st.top(); st.pop();

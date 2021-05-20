@@ -27,6 +27,7 @@ public:
     virtual PyObj * power(PyObj *) = 0; 
     virtual PyObj * operator-(PyObj *) = 0; 
     virtual PyObj * true_div(PyObj *) = 0; 
+    virtual PyObj * operator/(PyObj *) = 0; 
     virtual PyObj * operator%(PyObj *) = 0;
     virtual PyObj * operator*(PyObj *) = 0; 
     
@@ -60,6 +61,7 @@ public:
     virtual PyObj * power(PyObj *); 
     virtual PyObj * operator*(PyObj *); 
     virtual PyObj * true_div(PyObj *); 
+    virtual PyObj * operator/(PyObj *);
     virtual PyObj * operator%(PyObj *);
     
     virtual PyObj * str();
@@ -69,6 +71,40 @@ public:
 
     virtual ~num();
 };
+
+class tfloat: public PyObj{
+    double data;
+public:
+    tfloat(double);
+    inline double get(){return data;};
+    //logic
+    virtual PyObj * operator&&(PyObj *){return 0;}
+    virtual PyObj * operator||(PyObj *){return 0;}
+    virtual PyObj * operator!(){return 0;} 
+    virtual PyObj * operator>(PyObj *); 
+    virtual PyObj * operator>=(PyObj *);
+    virtual PyObj * operator==(PyObj *); 
+    virtual PyObj * operator<=(PyObj *); 
+    virtual PyObj * operator<(PyObj *); 
+    virtual PyObj * operator!=(PyObj *);
+    
+    //math
+    virtual PyObj * operator+(PyObj *); 
+    virtual PyObj * operator-(PyObj *); 
+    virtual PyObj * power(PyObj *); 
+    virtual PyObj * operator*(PyObj *); 
+    virtual PyObj * true_div(PyObj *){return 0;}
+    virtual PyObj * operator/(PyObj *);
+    virtual PyObj * operator%(PyObj *){return 0;}
+    
+    virtual PyObj * str();
+    virtual int to_int();
+    virtual std::string repr();
+    virtual bool truth();
+
+    virtual ~tfloat();
+};
+
 
 class fun: public PyObj{
     PyObj * (*f)(std::vector<PyObj *>);
@@ -92,6 +128,7 @@ public:
     virtual PyObj * operator%(PyObj *){return 0;}
     virtual PyObj * operator*(PyObj *){return 0;}
     virtual PyObj * operator-(PyObj *){return 0;} 
+    virtual PyObj * operator/(PyObj *){return 0;}
     
     PyObj * run(std::vector<PyObj *>); //вызвать функцию
     virtual PyObj * str();
@@ -118,6 +155,7 @@ public:
     virtual PyObj * operator<=(PyObj *){return 0;} 
     virtual PyObj * operator<(PyObj *){return 0;} 
     virtual PyObj * operator!=(PyObj *){return 0;}
+    
     //math
     virtual PyObj * operator+(PyObj *); 
     virtual PyObj * power(PyObj *){return 0;} 
@@ -125,6 +163,7 @@ public:
     virtual PyObj * operator*(PyObj *); 
     virtual PyObj * true_div(PyObj *){return 0;} 
     virtual PyObj * operator%(PyObj *){return 0;}
+    virtual PyObj * operator/(PyObj *){return 0;}
     
     virtual PyObj * str();
     virtual int to_int();
@@ -157,6 +196,7 @@ public:
     virtual PyObj * operator*(PyObj *); 
     virtual PyObj * true_div(PyObj *);
     virtual PyObj * operator%(PyObj *);
+    virtual PyObj * operator/(PyObj *);
     
     virtual PyObj * str();
     virtual int to_int();

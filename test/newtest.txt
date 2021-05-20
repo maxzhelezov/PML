@@ -1,4 +1,4 @@
-for i in 20:
+if or i in 20:
     for j in 30:
         a+b
     b+a
