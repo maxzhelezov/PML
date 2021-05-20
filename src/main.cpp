@@ -9,7 +9,7 @@
 using namespace std;
 int main (int argc,char * argv[])
 {
-    
+    int i;
     string initializer;
     if (argc<2 || argc>3)
     {
@@ -26,10 +26,14 @@ int main (int argc,char * argv[])
         else if (argc==3)
         {
             Parser test(initializer,argv[2]);
-            std::vector<Lex>::iterator pa = test.poliz.begin();
-            cout << "!!!!!!!";
-            while(pa != test.poliz.end())
-                std::cout <<  *pa++ << " ";
+            std::vector<Lex>::iterator pa = test.poliz.begin(); 
+        cout<<endl<<"Programm has been successfully compiled"<<endl;
+	    cout << "POLIZ:\n";
+	    i = 0;
+            while(pa != test.poliz.end()){
+                std::cout << i << ":" << *pa++ << " ";
+	    	i++;
+	    }
             cout << endl;
             Executer t;
             t.execute(test.poliz);
@@ -40,6 +44,5 @@ int main (int argc,char * argv[])
         cerr<<endl<<endl<<e << endl;
         return 1;
     }
-    cout<<endl<<"Programm has been successfully compiled"<<endl;
    
 }
